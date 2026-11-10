@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #313743;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #454c59;
+        }
+
+        th {
+            background-color: #3a7bd5;
+            color: #fff;
+        }
+
+        tr:hover {
+            background-color: #3b4250;
+        }
+
+        .empty {
+            text-align: center;
+            color: #9aa0aa;
+        }
+
+        .danger {
+            background-color: #c43d3d;
+            margin-top: 20px;
+        }
+
+        .danger:hover {
+            background-color: #a83232;
+        }
+
+        .logout {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 600px;">
+        <h1>Teacher</h1>
+        <p class="subtitle">Grades saved in this browser.</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Average</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="historyTableBody"></tbody>
+        </table>
+
+        <button class="danger" onclick="clearHistory()">Clear records</button>
+
+        <p class="subtitle logout"><a href="index.html">Logout</a></p>
+    </div>
+
+    <script>
+        const history = JSON.parse(localStorage.getItem('gradesHistory')) || [];
+        const tbody = document.getElementById('historyTableBody');
+
+        if (history.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="empty">No records.</td></tr>';
+        } else {
+            history.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${item.name}</td><td>${item.average}</td><td>${item.status}</td>`;
+                tbody.appendChild(row);
+            });
+        }
+
+        function clearHistory() {
+            if (confirm("Clear all records?")) {
+                localStorage.removeItem('gradesHistory');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
