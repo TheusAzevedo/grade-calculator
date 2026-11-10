@@ -48,9 +48,27 @@
     </style>
 </head>
 <body>
-    <div class="container" style="max-width: 600px;">
+    <div class="container" style="max-width: 550px;">
         <h1>Teacher</h1>
-        <p class="subtitle">Grades saved in this browser.</p>
+        <p class="subtitle">Enter the grades for a student.</p>
+
+        <div class="form-group">
+            <label for="studentName">Student username</label>
+            <input type="text" id="studentName">
+        </div>
+        <div class="form-group">
+            <label for="grade1">Grade 1</label>
+            <input type="number" id="grade1" min="0" max="10" step="0.1">
+        </div>
+        <div class="form-group">
+            <label for="grade2">Grade 2</label>
+            <input type="number" id="grade2" min="0" max="10" step="0.1">
+        </div>
+        <div class="form-group">
+            <label for="grade3">Grade 3</label>
+            <input type="number" id="grade3" min="0" max="10" step="0.1">
+        </div>
+        <button onclick="saveStudentGrade()">Save</button>
 
         <table>
             <thead>
@@ -64,30 +82,70 @@
         </table>
 
         <button class="danger" onclick="clearHistory()">Clear records</button>
-
         <p class="subtitle logout"><a href="index.html">Logout</a></p>
     </div>
 
     <script>
-        const history = JSON.parse(localStorage.getItem('gradesHistory')) || [];
-        const tbody = document.getElementById('historyTableBody');
+        function renderTable() {
+            const history = JSON.parse(localStorage.getItem('gradesHistory')) || [];
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '';
 
-        if (history.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" class="empty">No records.</td></tr>';
-        } else {
+            if (history.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="empty">No records.</td></tr>';
+                return;
+            }
+
             history.forEach(item => {
                 const row = document.createElement('tr');
-                row.innerHTML = `<td>${item.name}</td><td>${item.average}</td><td>${item.status}</td>`;
+                [item.name, item.average, item.status].forEach(text => {
+                    const cell = document.createElement('td');
+                    cell.textContent = text;
+                    row.appendChild(cell);
+                });
                 tbody.appendChild(row);
+            });
+        }
+
+        function saveStudentGrade() {
+            const name = document.getElementById('studentName').value.trim().toLowerCase();
+            const grades = ['grade1', 'grade2', 'grade3']
+                .map(id => parseFloat(document.getElementById(id).value));
+
+            if (!name || grades.some(isNaN)) {
+                alert("Fill in all the fields.");
+                return;
+            }
+
+            if (grades.some(g => g < 0 || g > 10)) {
+                alert("Grades must be between 0 and 10.");
+                return;
+            }
+
+            const avg = grades.reduce((a, b) => a + b) / 3;
+            let status = "Failed";
+            if (avg >= 7) status = "Approved";
+            else if (avg >= 5) status = "Remedial";
+
+            const history = (JSON.parse(localStorage.getItem('gradesHistory')) || [])
+                .filter(item => item.name !== name);
+            history.push({ name: name, average: avg.toFixed(2), status: status });
+            localStorage.setItem('gradesHistory', JSON.stringify(history));
+
+            renderTable();
+            ['studentName', 'grade1', 'grade2', 'grade3'].forEach(id => {
+                document.getElementById(id).value = '';
             });
         }
 
         function clearHistory() {
             if (confirm("Clear all records?")) {
                 localStorage.removeItem('gradesHistory');
-                location.reload();
+                renderTable();
             }
         }
+
+        renderTable();
     </script>
 </body>
 </html>
