@@ -8,26 +8,26 @@
     <style>
         .hidden { display: none !important; }
 
-        select {
-            width: 100%;
-            padding: 9px;
-            background-color: #313743;
-            border: 1px solid #454c59;
-            border-radius: 5px;
-            color: #fff;
-        }
-
         .link {
             margin-top: 15px;
         }
 
-        #registerBox {
+        #registerBox, #teacherRegisterBox {
             margin-top: 20px;
             max-width: 460px;
+        }
+        
+        .teacher-link {
+            display: block;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #a8a29e;
+            text-align: center;
         }
     </style>
 </head>
 <body>
+    <!-- 1️⃣ CARD DE SIGN IN (LOGIN VIA EMAIL) -->
     <div class="container" id="loginBox">
         <h1>Login</h1>
         <p class="subtitle">Sign in with your email to continue</p>
@@ -43,12 +43,14 @@
         </div>
 
         <button onclick="handleLogin()">Sign in</button>
-        <p class="subtitle link"><a href="#" onclick="toggleCards()">Create account / change password</a></p>
+        <p class="subtitle link"><a href="#" onclick="showCard('registerBox')">Create student account</a></p>
+        <a href="#" class="teacher-link" onclick="showCard('teacherRegisterBox')">Are you a teacher? Click here</a>
     </div>
 
+    <!-- 2️⃣ CARD DE REGISTRO EXCLUSIVO DE ESTUDANTES -->
     <div class="container hidden" id="registerBox">
-        <h1>Account</h1>
-        <p class="subtitle">Create a user or change a password</p>
+        <h1>Student Registration</h1>
+        <p class="subtitle">Create your immutable student account</p>
 
         <div class="form-group">
             <label for="regFirstName">First Name</label>
@@ -62,7 +64,7 @@
 
         <div class="form-group">
             <label for="regEmail">Email</label>
-            <input type="email" id="regEmail" placeholder="example@domain.com">
+            <input type="email" id="regEmail" placeholder="student@domain.com">
         </div>
 
         <div class="form-group">
@@ -75,19 +77,46 @@
             <input type="password" id="regConfirmPassword">
         </div>
 
+        <button onclick="handleStudentRegister()">Register as Student</button>
+        <p class="subtitle link"><a href="#" onclick="showCard('loginBox')">Back to Sign In</a></p>
+    </div>
+
+    <!-- 3️⃣ CARD DE REGISTRO EXCLUSIVO DE PROFESSORES (COM CHAVE DE ACESSO) -->
+    <div class="container hidden" id="teacherRegisterBox">
+        <h1>Teacher Staff Portal</h1>
+        <p class="subtitle">Authorized institutional registration only</p>
+
         <div class="form-group">
-            <label for="regRole">Role</label>
-            <select id="regRole">
-                <option value="student">Student</option>
-                <option value="teacher">Teacher</option>
-            </select>
+            <label for="tFirstName">First Name</label>
+            <input type="text" id="tFirstName">
         </div>
 
-        <button onclick="handleRegister()">Save</button>
-        <p class="subtitle link"><a href="#" onclick="toggleCards()">Back</a></p>
+        <div class="form-group">
+            <label for="tLastName">Last Name</label>
+            <input type="text" id="tLastName">
+        </div>
+
+        <div class="form-group">
+            <label for="tEmail">Institutional Email</label>
+            <input type="email" id="tEmail" placeholder="teacher@school.com">
+        </div>
+
+        <div class="form-group">
+            <label for="tPassword">Password</label>
+            <input type="password" id="tPassword">
+        </div>
+
+        <div class="form-group">
+            <label for="tAccessKey">Institutional Access Key</label>
+            <input type="password" id="tAccessKey" placeholder="Enter security token">
+        </div>
+
+        <button onclick="handleTeacherRegister()" style="background-color: #e05555;">Verify & Save Staff Account</button>
+        <p class="subtitle link"><a href="#" onclick="showCard('loginBox')">Back to Sign In</a></p>
     </div>
 
     <script>
+        // Inicializa a base mock se estiver limpa
         if (!localStorage.getItem('usersDB')) {
             localStorage.setItem('usersDB', JSON.stringify({
                 "teacher@school.com": { password: "teacher123", role: "teacher", name: "Prof. Matheus", studentID: "" },
@@ -95,9 +124,12 @@
             }));
         }
 
-        function toggleCards() {
-            document.getElementById('loginBox').classList.toggle('hidden');
-            document.getElementById('registerBox').classList.toggle('hidden');
+        // Gerenciador inteligente de transição de telas
+        function showCard(targetId) {
+            ['loginBox', 'registerBox', 'teacherRegisterBox'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(targetId).classList.remove('hidden');
         }
 
         function handleLogin() {
@@ -111,23 +143,22 @@
                 return;
             }
 
-            localStorage.setItem('currentUser', JSON.stringify({
-                email: email,
-                name: user.name,
+            localStorage.setItem('currentUser', JSON.stringify({ 
+                email: email, 
+                name: user.name, 
                 role: user.role,
-                studentID: user.studentID
+                studentID: user.studentID 
             }));
-
             location.href = user.role === 'teacher' ? 'teacher.html' : 'student.html';
         }
 
-        function handleRegister() {
+        // CADASTRO EXCLUSIVO DE ALUNOS
+        function handleStudentRegister() {
             const firstName = document.getElementById('regFirstName').value.trim();
             const lastName = document.getElementById('regLastName').value.trim();
             const email = document.getElementById('regEmail').value.trim().toLowerCase();
             const password = document.getElementById('regPassword').value;
             const confirmPassword = document.getElementById('regConfirmPassword').value;
-            const role = document.getElementById('regRole').value;
 
             if (!firstName || !lastName || !email || !password || !confirmPassword) {
                 alert("Fill in all the fields.");
@@ -135,25 +166,28 @@
             }
 
             if (password !== confirmPassword) {
-                alert("Passwords do not match. Please verify.");
+                alert("Passwords do not match.");
                 return;
             }
 
             const users = JSON.parse(localStorage.getItem('usersDB')) || {};
+            
+            if (users[email] && users[email].role === 'teacher') {
+                alert("This email is already registered as a Teacher account.");
+                return;
+            }
+
             const fullName = `${firstName.charAt(0).toUpperCase() + firstName.slice(1)} ${lastName.charAt(0).toUpperCase() + lastName.slice(1)}`;
+            let existingStudentID = users[email] ? users[email].studentID : "";
 
-            let existingStudentID = "";
-
-            if (users[email]) {
-                existingStudentID = users[email].studentID;
-            } else {
+            if (!existingStudentID) {
                 const duplicateNameUser = Object.values(users).find(u => u.name.toLowerCase() === fullName.toLowerCase());
                 if (duplicateNameUser) {
                     existingStudentID = duplicateNameUser.studentID;
                 }
             }
 
-            if (role === 'student' && !existingStudentID) {
+            if (!existingStudentID) {
                 do {
                     existingStudentID = Math.floor(100000 + Math.random() * 900000).toString();
                     var idExists = Object.values(users).some(u => u.studentID === existingStudentID);
@@ -162,20 +196,53 @@
 
             users[email] = {
                 password: password,
-                role: role,
+                role: "student",
                 name: fullName,
-                studentID: role === 'student' ? existingStudentID : ""
+                studentID: existingStudentID
             };
 
             localStorage.setItem('usersDB', JSON.stringify(users));
+            alert(`Student account securely processed!\n\nYour PERMANENT Student ID (RA) is: ${existingStudentID}`);
+            showCard('loginBox');
+        }
 
-            if (role === 'student') {
-                alert(`Account securely processed!\n\nYour PERMANENT Student ID (RA) is: ${existingStudentID}\nThis code is locked to your Name and Email.`);
-            } else {
-                alert("Saved.");
+        // CADASTRO EXCLUSIVO DE PROFESSORES (COM VALIDAÇÃO DE CHAVE)
+        function handleTeacherRegister() {
+            const firstName = document.getElementById('tFirstName').value.trim();
+            const lastName = document.getElementById('tLastName').value.trim();
+            const email = document.getElementById('tEmail').value.trim().toLowerCase();
+            const password = document.getElementById('tPassword').value;
+            const accessKey = document.getElementById('tAccessKey').value.trim();
+
+            if (!firstName || !lastName || !email || !password || !accessKey) {
+                alert("Fill in all institutional fields.");
+                return;
             }
 
-            toggleCards();
+            if (accessKey !== "SCHOOL2026") {
+                alert("Access Denied: Invalid Institutional Access Key.");
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('usersDB')) || {};
+
+            if (users[email] && users[email].role === 'student') {
+                alert("This email is already registered as a Student account.");
+                return;
+            }
+
+            const fullName = `Prof. ${firstName.charAt(0).toUpperCase() + firstName.slice(1)} ${lastName.charAt(0).toUpperCase() + lastName.slice(1)}`;
+
+            users[email] = {
+                password: password,
+                role: "teacher",
+                name: fullName,
+                studentID: ""
+            };
+
+            localStorage.setItem('usersDB', JSON.stringify(users));
+            alert("Teacher Staff account authorized and created successfully!");
+            showCard('loginBox');
         }
     </script>
 </body>
