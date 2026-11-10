@@ -2,6 +2,7 @@ import os
 import random
 import re
 import base64
+import locales
 
 users = {
     "teacher@school.com": {
@@ -36,64 +37,90 @@ def clear():
     os.system("cls" if os.name == "nt" else "clear")
 
 
+def t(key):
+    return locales.translations[locales.current_lang][key]
+
+
+def enc(s):
+    return base64.b64encode(s.encode('utf-8')).decode('utf-8')
+
+
+def dec(s):
+    return base64.b64decode(s.encode('utf-8')).decode('utf-8')
+
+
+def status_label(st):
+    if locales.current_lang != "pt":
+        return st
+    if st == "Approved":
+        return "Aprovado"
+    if st == "Remedial":
+        return "Recuperação"
+    return "Reprovado"
+
+
 def login():
     clear()
     print("=" * 45)
-    print("               ACADEMIC PORTAL               ")
+    print(t("portalTitle"))
+    print(f"                                   [ {t('currentLoc')} ]")
     print("=" * 45)
-    print("1. Sign In")
-    print("2. Create Student Account")
+    print(t("menuSignIn"))
+    print(t("menuRegister"))
+    print(t("menuLanguage"))
     print("=" * 45)
     choice = input("> ").strip()
 
+    if choice == "3":
+        locales.location_menu()
+        return None
+
     if choice == "2":
         clear()
-        print("--- STUDENT REGISTRATION ---")
-        first_name = input("First Name: ").strip()
-        last_name = input("Last Name: ").strip()
-        email = input("Email: ").strip().lower()
-        password = input("Password (Min 6 chars): ").strip()
-        confirm_password = input("Confirm Password: ").strip()
+        print(t("regTitle"))
+        first_name = input(t("fieldFirstName")).strip()
+        last_name = input(t("fieldLastName")).strip()
+        email = input(t("fieldEmail")).strip().lower()
+        password = input(t("fieldPassword")).strip()
+        confirm = input(t("fieldConfirmPassword")).strip()
 
         if not first_name or not last_name or not email or not password:
-            print("\nValidation Error: All fields are required.")
-            input("Press Enter to continue...")
+            print(t("errRequired"))
+            input(t("pressEnter"))
             return None
 
         if not re.match(NAME_REGEX, first_name) or not re.match(NAME_REGEX, last_name):
-            print("\nSecurity Error: Names must contain only letters and be at least 2 chars long.")
-            input("Press Enter to continue...")
+            print(t("errName"))
+            input(t("pressEnter"))
             return None
 
         if not re.match(EMAIL_REGEX, email):
-            print("\nSecurity Error: Invalid email format. Use: user@domain.com")
-            input("Press Enter to continue...")
+            print(t("errEmail"))
+            input(t("pressEnter"))
             return None
 
         if len(password) < 6:
-            print("\nSecurity Error: Password must be at least 6 characters long.")
-            input("Press Enter to continue...")
+            print(t("errPassLength"))
+            input(t("pressEnter"))
             return None
 
-        if password != confirm_password:
-            print("\nValidation Error: Passwords do not match.")
-            input("Press Enter to continue...")
+        if password != confirm:
+            print(t("errPassMatch"))
+            input(t("pressEnter"))
             return None
 
-        if email in users and users[email]["role"] == "teacher":
-            print("\nConflict Error: This email belongs to an institutional Teacher account.")
-            input("Press Enter to continue...")
+        if email in users:
+            print(t("errEnumMitigation"))
+            input(t("pressEnter"))
             return None
 
         full_name = first_name.capitalize() + " " + last_name.capitalize()
 
         existing_id = ""
-        if email in users:
-            existing_id = users[email].get("id", "")
-        else:
-            duplicate = next((u for u in users.values() if base64.b64decode(u["name"].encode('utf-8')).decode('utf-8').lower() == full_name.lower()), None)
-            if duplicate:
-                existing_id = duplicate.get("id", "")
+        for u in users.values():
+            if dec(u["name"]).lower() == full_name.lower():
+                existing_id = u.get("id", "")
+                break
 
         if not existing_id:
             while True:
@@ -102,56 +129,60 @@ def login():
                     break
 
         users[email] = {
-            "password": base64.b64encode(password.encode('utf-8')).decode('utf-8'),
+            "password": enc(password),
             "role": "student",
-            "name": base64.b64encode(full_name.encode('utf-8')).decode('utf-8'),
+            "name": enc(full_name),
             "id": existing_id,
         }
 
-        print("\nAccount processed! Your PERMANENT ID (RA) is: " + existing_id)
-        input("Press Enter to go to login...")
+        print(t("successReg") + existing_id)
+        input(t("pressEnter"))
         return None
 
     clear()
-    print("--- SIGN IN ---")
-    email = input("Email: ").strip().lower()
-    password = input("Password: ").strip()
+    print(t("signInTitle"))
+    email = input(t("fieldEmail")).strip().lower()
+    password = input(t("fieldPasswordLogin"))
 
     user = users.get(email)
-    if user and base64.b64decode(user["password"].encode('utf-8')).decode('utf-8') == password:
+    if user and dec(user["password"]) == password:
         return user
 
-    print("\nWrong email or password.")
-    input("Press Enter to try again...")
+    print(t("errWrongCreds"))
+    input(t("pressEnterTry"))
     return None
 
 
 def student_menu(user):
     while True:
         clear()
-        real_name = base64.b64decode(user['name'].encode('utf-8')).decode('utf-8')
-        print("Student - " + real_name + " | ID: " + user['id'])
+        nome = dec(user['name'])
+        print(t("studentHeader") + nome + " | ID: " + user['id'])
         print("=" * 45)
-        print("1. View My Report Card")
-        print("2. Logout")
+        print(t("menuViewReport"))
+        print(t("menuLogout"))
         print("=" * 45)
         option = input("> ").strip()
 
         if option == "1":
             clear()
-            print("--- OFFICIAL ACADEMIC REPORT ---")
-            record = next((r for r in history if r["id"] == user["id"]), None)
+            print(t("reportHeader"))
+            record = None
+            for r in history:
+                if r["id"] == user["id"]:
+                    record = r
+                    break
 
             if record:
-                print("Name:    " + record['name'])
+                print(t("reportName") + record['name'])
                 print("ID (RA): " + record['id'])
-                grades_str = ", ".join("{:.1f}".format(g) for g in record["grades"])
-                print("Grades:  " + grades_str)
-                print("Average: {:.2f}".format(record['average']))
-                print("Status:  [" + record['status'].upper() + "]")
+                grades_str = ", ".join(f"{g:.1f}" for g in record["grades"])
+                print(t("reportGrades") + grades_str)
+                print(t("reportAverage") + f"{record['average']:.2f}")
+                print(t("reportStatus") + "[" + status_label(record["status"]).upper() + "]")
             else:
-                print("Hello " + real_name + ". Your grades have not been released by the teacher yet.")
-            input("\nPress Enter to go back...")
+                print(t("noGradesYet"))
+            input(t("pressEnterBack"))
 
         elif option == "2":
             break
@@ -160,65 +191,76 @@ def student_menu(user):
 def teacher_menu(user):
     while True:
         clear()
-        real_name = base64.b64decode(user['name'].encode('utf-8')).decode('utf-8')
-        print("Teacher - " + real_name)
+        nome = dec(user['name'])
+        print(f"Teacher - {nome}")
         print("=" * 45)
-        print("1. Enter Student Grades (By ID)")
-        print("2. View Grade History")
-        print("3. Logout")
+        print(t("menuLaunchGrades"))
+        print(t("menuViewHistory"))
+        print(t("menuLogoutTeacher"))
         print("=" * 45)
         option = input("> ").strip()
 
         if option == "1":
             clear()
-            print("--- LAUNCH STUDENT GRADES ---")
-            student_id = input("Enter Student ID (RA): ").strip()
+            print(t("launchHeader"))
+            student_id = input(t("fieldStudentID")).strip()
 
-            student_user = next((u for u in users.values() if u.get("id") == student_id), None)
+            student_user = None
+            for u in users.values():
+                if u.get("id") == student_id:
+                    student_user = u
+                    break
+
             if not student_user:
-                print("\nError: Student ID not found in database.")
-                input("Press Enter to go back...")
+                print(t("errIDNotFound"))
+                input(t("pressEnter"))
                 continue
 
             grades = []
             for i in range(1, 4):
                 while True:
                     try:
-                        g = float(input("Grade " + str(i) + ": "))
+                        g = float(input(t("fieldGrade") + f"{i}: "))
                     except ValueError:
-                        print("Enter a valid number.")
+                        print(t("errNumber"))
                         continue
                     if 0 <= g <= 10:
                         grades.append(g)
                         break
-                    print("Grade must be between 0 and 10.")
+                    print(t("errGradeBounds"))
 
             avg = sum(grades) / 3
-            status = "Approved" if avg >= 7 else "Remedial" if avg >= 5 else "Failed"
+            if avg >= 7:
+                status = "Approved"
+            elif avg >= 5:
+                status = "Remedial"
+            else:
+                status = "Failed"
 
-            global history
-            history = [r for r in history if r["id"] != student_id]
+            for i, r in enumerate(history):
+                if r["id"] == student_id:
+                    del history[i]
+                    break
 
-            student_real_name = base64.b64decode(student_user["name"].encode('utf-8')).decode('utf-8')
             history.append({
                 "id": student_id,
-                "name": student_real_name,
+                "name": dec(student_user["name"]),
                 "grades": grades,
                 "average": round(avg, 2),
                 "status": status,
             })
-            print("\nReport card updated successfully!")
-            input("Press Enter to continue...")
+            print(t("successLaunch"))
+            input(t("pressEnter"))
 
         elif option == "2":
             clear()
-            print("{:<10}{:<18}{:<8}Status".format("ID", "Student", "Avg"))
+            print(f"{'ID':<10}{'Student':<18}{'Avg':<8}Status")
             print("-" * 40)
             if not history:
-                print("No records yet.")
+                print(t("historyEmpty"))
             for r in history:
-                print("{:<10}{:<18}{:<8.2f}{}".format(r['id'], r['name'], r['average'], r['status']))
-            input("\nPress Enter to go back...")
+                print(f"{r['id']:<10}{r['name']:<18}{r['average']:<8.2f}{status_label(r['status'])}")
+            input(t("pressEnterBack"))
 
         elif option == "3":
             break

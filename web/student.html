@@ -13,50 +13,88 @@
 </head>
 <body>
     <div class="container">
-        <h1>Report Card</h1>
+        <h1 data-i18n="reportHeader">Report Card</h1>
         <p class="subtitle" id="welcomeMessage"></p>
 
         <div id="resultCard" class="result-card">
             <div id="studentIDDisplay" class="id-display"></div>
             <h2 id="studentName"></h2>
-            <p class="result-info">Average: <span id="average">--</span></p>
+            <p class="result-info"><span data-i18n="labelAvg">Average</span>: <span id="average">--</span></p>
             <div id="status" class="badge pending-badge">Pending</div>
         </div>
 
-        <p class="subtitle logout"><a href="index.html" onclick="logout()">Logout</a></p>
-        
-        <footer style="margin-top: 25px; text-align: center; font-size: 11px; color: #6b7280; letter-spacing: 0.3px;">
+        <p class="subtitle logout"><a href="index.html" onclick="logout()" data-i18n="btnLogout">Logout</a></p>
+
+        <footer style="margin-top: 25px; text-align: center; font-size: 11px; color: #6b7280; letter-spacing: 0.3px;" data-i18n="copyright">
             &copy; 2026 Matheus Dias. All rights reserved. Licensed under MIT Guidelines.
         </footer>
     </div>
 
     <script>
-        var user = JSON.parse(localStorage.getItem('currentUser'));
+        const translations = {
+            en: {
+                reportHeader: "Report Card",
+                labelAvg: "Average",
+                btnLogout: "Logout",
+                copyright: "© 2026 Matheus Dias. All rights reserved. Licensed under MIT Guidelines.",
+                noGrades: " (no grades yet)",
+                loginAs: "Logged in as ",
+                sessionExpired: "Session Expired: This account has been deactivated or removed by the institution.",
+                status_approved: "Approved",
+                status_remedial: "Remedial",
+                status_failed: "Failed",
+                status_pending: "Pending"
+            },
+            pt: {
+                reportHeader: "Boletim Escolar",
+                labelAvg: "Média",
+                btnLogout: "Sair (Logout)",
+                copyright: "© 2026 Matheus Dias. Todos os direitos reservados. Licenciado sob as Diretrizes MIT.",
+                noGrades: " (sem notas lançadas)",
+                loginAs: "Conectado como ",
+                sessionExpired: "Sessão Expirada: Esta conta foi desativada ou removida pela instituição.",
+                status_approved: "Aprovado",
+                status_remedial: "Recuperação",
+                status_failed: "Reprovado",
+                status_pending: "Pendente"
+            }
+        };
 
-        if (!user) {
+        const currentLang = localStorage.getItem('preferredLang') || 'en';
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        const usersDB = JSON.parse(localStorage.getItem('usersDB')) || {};
+
+        if (!user || !usersDB[user.email]) {
+            localStorage.removeItem('currentUser');
+            alert(translations[currentLang].sessionExpired);
             location.href = 'index.html';
         } else {
-            var welcome = document.getElementById('welcomeMessage');
-            welcome.textContent = 'Logged in as ' + user.name;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) el.textContent = translations[currentLang][key];
+            });
+
+            const welcome = document.getElementById('welcomeMessage');
+            welcome.textContent = translations[currentLang].loginAs + user.name;
             document.getElementById('studentName').textContent = user.name;
 
             if (user.studentID) {
-                document.getElementById('studentIDDisplay').textContent = 'STUDENT ID: ' + user.studentID;
+                document.getElementById('studentIDDisplay').textContent = "STUDENT ID (RA): " + user.studentID;
             }
 
-            var history = JSON.parse(localStorage.getItem('gradesHistory')) || [];
-            var record = history.find(function (item) { return item.id === user.studentID; });
+            const history = JSON.parse(localStorage.getItem('gradesHistory')) || [];
+            const record = history.find(item => item.id === user.studentID);
 
+            const statusElement = document.getElementById('status');
             if (record) {
-                var key = record.status.toLowerCase();
-                var status = document.getElementById('status');
-
+                const key = record.status.toLowerCase();
                 document.getElementById('average').textContent = record.average;
                 document.getElementById('resultCard').className = 'result-card ' + key + '-card';
-                status.className = 'badge ' + key + '-badge';
-                status.textContent = record.status;
+                statusElement.className = 'badge ' + key + '-badge';
+                statusElement.textContent = translations[currentLang]['status_' + key];
             } else {
-                welcome.textContent += ' (no grades yet)';
+                welcome.textContent += translations[currentLang].noGrades;
+                statusElement.textContent = translations[currentLang].status_pending;
             }
         }
 

@@ -3,139 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher</title>
+    <title>Teacher Panel</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background-color: #313743;
-        }
-
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #454c59;
-        }
-
-        th {
-            background-color: #3a7bd5;
-            color: #fff;
-        }
-
-        tr:hover {
-            background-color: #3b4250;
-        }
-
-        .empty {
-            text-align: center;
-            color: #9aa0aa;
-        }
-
-        .danger {
-            background-color: #c43d3d;
-            margin-top: 20px;
-        }
-
-        .danger:hover {
-            background-color: #a83232;
-        }
-
-        .logout {
-            margin-top: 20px;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: #313743; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #454c59; }
+        th { background-color: #3a7bd5; color: #fff; }
+        tr:hover { background-color: #3b4250; }
+        .empty { text-align: center; color: #9aa0aa; }
+        .danger { background-color: #c43d3d; margin-top: 20px; }
+        .danger:hover { background-color: #a83232; }
+        .btn-delete { background-color: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; width: auto; margin-top: 0; }
+        .btn-delete:hover { background-color: #dc2626; }
+        .logout { margin-top: 20px; }
     </style>
 </head>
 <body>
-    <div class="container" style="max-width: 550px;">
-        <h1>Teacher</h1>
-        <p class="subtitle">Enter the grades for a student.</p>
+    <div class="container" style="max-width: 600px;">
+        <h1 data-i18n="panelTitle">Teacher Dashboard</h1>
+        <p class="subtitle" data-i18n="panelSubtitle">Institutional Management Layer - Administer Records</p>
 
         <div class="form-group">
-            <label for="studentID">Student ID</label>
+            <label for="studentID">Student ID (RA)</label>
             <input type="text" id="studentID">
         </div>
         <div class="form-group">
-            <label for="grade1">Grade 1</label>
+            <label for="grade1" data-i18n="g1">Grade 1</label>
             <input type="number" id="grade1" min="0" max="10" step="0.1">
         </div>
         <div class="form-group">
-            <label for="grade2">Grade 2</label>
+            <label for="grade2" data-i18n="g2">Grade 2</label>
             <input type="number" id="grade2" min="0" max="10" step="0.1">
         </div>
         <div class="form-group">
-            <label for="grade3">Grade 3</label>
+            <label for="grade3" data-i18n="g3">Grade 3</label>
             <input type="number" id="grade3" min="0" max="10" step="0.1">
         </div>
-        <button onclick="saveStudentGrade()">Save</button>
+        <button onclick="saveStudentGrade()" data-i18n="btnSave">Save Record</button>
 
         <table>
             <thead>
                 <tr>
-                    <th>Student</th>
-                    <th>Average</th>
-                    <th>Status</th>
+                    <th data-i18n="thInfo">Student Info</th>
+                    <th data-i18n="thAvg">Average</th>
+                    <th data-i18n="thStatus">Status</th>
+                    <th data-i18n="thAction">Actions</th>
                 </tr>
             </thead>
             <tbody id="historyTableBody"></tbody>
         </table>
 
-        <button class="danger" onclick="clearHistory()">Clear records</button>
-        <p class="subtitle logout"><a href="index.html">Logout</a></p>
+        <button class="danger" onclick="clearHistory()" data-i18n="btnReset">Reset All Records</button>
+        <p class="subtitle logout"><a href="index.html" data-i18n="btnLogout">Logout</a></p>
 
-         <footer style="margin-top: 25px; text-align: center; font-size: 11px; color: #6b7280; letter-spacing: 0.3px;">
+        <footer style="margin-top: 25px; text-align: center; font-size: 11px; color: #6b7280; letter-spacing: 0.3px;" data-i18n="copyright">
             &copy; 2026 Matheus Dias. All rights reserved. Licensed under MIT Guidelines.
         </footer>
     </div>
 
     <script>
+        const translations = {
+            en: {
+                panelTitle: "Teacher Dashboard",
+                panelSubtitle: "Institutional Management Layer - Administer Records",
+                g1: "Grade 1", g2: "Grade 2", g3: "Grade 3",
+                btnSave: "Save Record", btnReset: "Reset All Records", btnLogout: "Logout",
+                thInfo: "Student Info", thAvg: "Average", thStatus: "Status", thAction: "Actions",
+                emptyTable: "No active records found.", btnRemove: "Remove",
+                alertRequired: "Validation Error: Fill in all the fields.",
+                alertBounds: "Security Error: Grades must be between 0 and 10.",
+                alertNotFound: "Database Error: Student ID not found or account deactivated.",
+                confirmDelete: "Deactivate and remove student ID {id} from the history?",
+                confirmReset: "Clear all active academic records?",
+                successLaunch: "Report card updated successfully!",
+                status_approved: "Approved", status_remedial: "Remedial", status_failed: "Failed",
+                copyright: "© 2026 Matheus Dias. All rights reserved. Licensed under MIT Guidelines."
+            },
+            pt: {
+                panelTitle: "Painel do Professor",
+                panelSubtitle: "Camada de Gestão Institucional - Administrar Registros",
+                g1: "Nota 1", g2: "Nota 2", g3: "Nota 3",
+                btnSave: "Salvar Registro", btnReset: "Resetar Todos os Registros", btnLogout: "Sair (Logout)",
+                thInfo: "Dados do Aluno", thAvg: "Média", thStatus: "Status", thAction: "Ações",
+                emptyTable: "Nenhum registro ativo encontrado.", btnRemove: "Remover",
+                alertRequired: "Erro de Validação: Preencha todos os campos.",
+                alertBounds: "Erro de Segurança: As notas devem estar entre 0 e 10.",
+                alertNotFound: "Erro de Banco de Dados: ID do Aluno não encontrado ou conta desativada.",
+                confirmDelete: "Desativar e remover o ID de estudante {id} do histórico?",
+                confirmReset: "Limpar todos os registros acadêmicos ativos?",
+                successLaunch: "Boletim atualizado com sucesso!",
+                status_approved: "Aprovado", status_remedial: "Recuperação", status_failed: "Reprovado",
+                copyright: "© 2026 Matheus Dias. Todos os direitos reservados. Licenciado sob as Diretrizes MIT."
+            }
+        };
+
+        const currentLang = localStorage.getItem('preferredLang') || 'en';
+
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) el.textContent = translations[currentLang][key];
+            });
+        }
+
         function renderTable() {
             const history = JSON.parse(localStorage.getItem('gradesHistory')) || [];
             const tbody = document.getElementById('historyTableBody');
             tbody.innerHTML = '';
 
             if (history.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" class="empty">No records.</td></tr>';
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 4;
+                cell.className = 'empty';
+                cell.textContent = translations[currentLang].emptyTable;
+                row.appendChild(cell);
+                tbody.appendChild(row);
                 return;
             }
 
             history.forEach(item => {
                 const row = document.createElement('tr');
-                const student = item.id + ' - ' + item.studentName;
+                const studentInfo = "ID: " + item.id + " (" + item.studentName + ")";
 
-                [student, item.average, item.status].forEach(text => {
+                const keyStatus = item.status.toLowerCase();
+                const translatedStatus = translations[currentLang]['status_' + keyStatus] || item.status;
+
+                [studentInfo, item.average, translatedStatus].forEach(text => {
                     const cell = document.createElement('td');
                     cell.textContent = text;
                     row.appendChild(cell);
                 });
+
+                const actionCell = document.createElement('td');
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn-delete';
+                deleteBtn.textContent = translations[currentLang].btnRemove;
+                deleteBtn.onclick = function() { deleteStudentRecord(item.id); };
+                actionCell.appendChild(deleteBtn);
+                row.appendChild(actionCell);
+
                 tbody.appendChild(row);
             });
         }
 
         function saveStudentGrade() {
             const studentID = document.getElementById('studentID').value.trim();
-            const grades = ['grade1', 'grade2', 'grade3']
-                .map(id => parseFloat(document.getElementById(id).value));
+            const grades = ['grade1', 'grade2', 'grade3'].map(id => parseFloat(document.getElementById(id).value));
 
             if (!studentID || grades.some(isNaN)) {
-                alert("Fill in all the fields.");
+                alert(translations[currentLang].alertRequired);
                 return;
             }
 
             if (grades.some(g => g < 0 || g > 10)) {
-                alert("Grades must be between 0 and 10.");
+                alert(translations[currentLang].alertBounds);
                 return;
             }
 
             const users = JSON.parse(localStorage.getItem('usersDB')) || {};
-            const username = Object.keys(users).find(key => users[key].studentID === studentID);
+            const foundUserKey = Object.keys(users).find(key => users[key].studentID === studentID);
 
-            if (!username) {
-                alert("Student ID not found.");
+            if (!foundUserKey) {
+                alert(translations[currentLang].alertNotFound);
                 return;
             }
 
+            const studentRealName = users[foundUserKey].name;
             const avg = grades.reduce((a, b) => a + b) / 3;
             let status = "Failed";
             if (avg >= 7) status = "Approved";
@@ -146,27 +180,43 @@
 
             history.push({
                 id: studentID,
-                name: username,
-                studentName: users[username].name,
+                name: foundUserKey,
+                studentName: atob(studentRealName),
                 average: avg.toFixed(2),
                 status: status
             });
 
             localStorage.setItem('gradesHistory', JSON.stringify(history));
-
+            alert(translations[currentLang].successLaunch);
             renderTable();
-            ['studentID', 'grade1', 'grade2', 'grade3'].forEach(id => {
-                document.getElementById(id).value = '';
-            });
+            ['studentID', 'grade1', 'grade2', 'grade3'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        function deleteStudentRecord(studentId) {
+            const textConfirm = translations[currentLang].confirmDelete.replace('{id}', studentId);
+            if (confirm(textConfirm)) {
+                let history = JSON.parse(localStorage.getItem('gradesHistory')) || [];
+                history = history.filter(item => item.id !== studentId);
+                localStorage.setItem('gradesHistory', JSON.stringify(history));
+
+                const users = JSON.parse(localStorage.getItem('usersDB')) || {};
+                const userKey = Object.keys(users).find(key => users[key].studentID === studentId);
+                if (userKey) {
+                    delete users[userKey];
+                    localStorage.setItem('usersDB', JSON.stringify(users));
+                }
+                renderTable();
+            }
         }
 
         function clearHistory() {
-            if (confirm("Clear all records?")) {
+            if (confirm(translations[currentLang].confirmReset)) {
                 localStorage.removeItem('gradesHistory');
                 renderTable();
             }
         }
 
+        applyTranslations();
         renderTable();
     </script>
 </body>

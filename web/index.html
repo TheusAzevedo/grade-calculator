@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Academic Portal</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .hidden { display: none !important; }
@@ -24,12 +24,198 @@
             color: #a8a29e;
             text-align: center;
         }
+
+        .open-lang-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #252a33;
+            border: 1px solid #454c59;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: auto;
+            margin-top: 0;
+        }
+
+        .open-lang-btn:hover {
+            background-color: #313743;
+        }
+
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .lang-drawer {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 320px;
+            height: 100vh;
+            background-color: #1a1d23;
+            border-left: 1px solid #313743;
+            z-index: 1000;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            color: #eee;
+            font-family: Arial, sans-serif;
+        }
+
+        .lang-drawer.open {
+            right: 0;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #313743;
+        }
+
+        .drawer-header h3 {
+            font-size: 16px;
+            font-weight: normal;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #9aa0aa;
+            font-size: 20px;
+            cursor: pointer;
+            width: auto;
+            margin-top: 0;
+            padding: 0;
+        }
+
+        .current-selection {
+            background-color: #3a7bd5;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+        }
+
+        .search-box-container {
+            padding: 15px 20px;
+            position: relative;
+        }
+
+        .search-box-container input {
+            width: 100%;
+            padding: 8px 35px 8px 12px;
+            background-color: #1a1d23;
+            border: none;
+            border-bottom: 1px solid #454c59;
+            color: #fff;
+            font-size: 14px;
+            border-radius: 0;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 32px;
+            top: 22px;
+            color: #9aa0aa;
+            font-size: 14px;
+        }
+
+        .drawer-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 20px;
+        }
+
+        .category-title {
+            color: #9aa0aa;
+            font-size: 14px;
+            margin: 20px 0 10px 0;
+        }
+
+        .lang-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 10px;
+            width: 100%;
+            background: none;
+            border: none;
+            color: #eee;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 4px;
+            margin-top: 0;
+        }
+
+        .lang-option:hover {
+            background-color: #252a33;
+        }
     </style>
 </head>
 <body>
+
+    <button class="open-lang-btn" onclick="toggleDrawer(true)">
+        <span id="active-flag" data-i18n="flagIcon">🇺🇸</span>
+        <span id="active-label" data-i18n="flagLabel">Global | EN</span>
+    </button>
+
+    <div class="drawer-overlay" id="overlay" onclick="toggleDrawer(false)"></div>
+
+    <div class="lang-drawer" id="langDrawer">
+        <div class="drawer-header">
+            <h3 data-i18n="drawerTitle">Your location</h3>
+            <button class="close-btn" onclick="toggleDrawer(false)">&times;</button>
+        </div>
+
+        <div class="current-selection">
+            <span id="current-flag" data-i18n="flagIcon">🇺🇸</span>
+            <span id="current-label" data-i18n="flagLabel">Global | EN</span>
+        </div>
+
+        <div class="search-box-container">
+            <input type="text" placeholder="Search location..." disabled style="cursor: not-allowed;">
+            <span class="search-icon">🔍</span>
+        </div>
+
+        <div class="drawer-content">
+            <div class="category-title">Worldwide</div>
+            <button class="lang-option" onclick="changeLanguage('en')">
+                <span>🇺🇸</span> Global | EN
+            </button>
+
+            <div class="category-title">Americas</div>
+            <button class="lang-option" onclick="changeLanguage('pt')">
+                <span>🇧🇷</span> Brazil | PT
+            </button>
+            <button class="lang-option" style="opacity: 0.4; cursor: not-allowed;" disabled>
+                <span>🇦🇷</span> Argentina | ES
+            </button>
+            <button class="lang-option" style="opacity: 0.4; cursor: not-allowed;" disabled>
+                <span>🇨🇦</span> Canada | EN
+            </button>
+        </div>
+    </div>
+
     <div class="container" id="loginBox">
-        <h1>Login</h1>
-        <p class="subtitle">Sign in with your email to continue</p>
+        <h1 data-i18n="loginTitle">Login</h1>
+        <p class="subtitle" data-i18n="loginSubtitle">Sign in with your email to continue</p>
 
         <div class="form-group">
             <label for="loginEmail">Email</label>
@@ -37,34 +223,34 @@
         </div>
 
         <div class="form-group">
-            <label for="loginPassword">Password</label>
+            <label for="loginPassword" data-i18n="labelPassword">Password</label>
             <input type="password" id="loginPassword">
         </div>
 
-        <button id="loginBtn" onclick="handleLogin()">Sign in</button>
-        <p class="subtitle link"><a href="#" onclick="showCard('registerBox')">Create student account</a></p>
-        <a href="#" class="teacher-link" onclick="showCard('teacherRegisterBox')">Are you a teacher? Click here</a>
+        <button id="loginBtn" onclick="handleLogin()" data-i18n="btnSignIn">Sign in</button>
+        <p class="subtitle link"><a href="#" onclick="showCard('registerBox')" data-i18n="linkCreateStudent">Create student account</a></p>
+        <a href="#" class="teacher-link" onclick="showCard('teacherRegisterBox')" data-i18n="linkTeacherClick">Are you a teacher? Click here</a>
 
-        <p style="color: #ef4444; font-size: 11px; margin-top: 20px; text-align: center; font-weight: bold;">
-            SECURITY NOTICE: Institutional staff will NEVER ask for your password or Student ID (RA) via email or chat.
+        <p style="color: #ef4444; font-size: 11px; margin-top: 20px; text-align: center; font-weight: bold;" data-i18n="securityNotice">
+            🛡️ SECURITY NOTICE: Institutional staff will NEVER ask for your password or Student ID (RA) via email or chat.
         </p>
-         
-        <footer style="margin-top: 25px; text-align: center; font-size: 11px; color: #6b7280; letter-spacing: 0.3px;">
+
+        <footer style="margin-top: 25px; text-align: center; font-size: 11px; color: #6b7280; letter-spacing: 0.3px;" data-i18n="copyright">
             &copy; 2026 Matheus Dias. All rights reserved. Licensed under MIT Guidelines.
         </footer>
     </div>
 
     <div class="container hidden" id="registerBox">
-        <h1>Student Registration</h1>
-        <p class="subtitle">Create your immutable student account</p>
+        <h1 data-i18n="regStudentTitle">Student Registration</h1>
+        <p class="subtitle" data-i18n="regStudentSubtitle">Create your immutable student account</p>
 
         <div class="form-group">
-            <label for="regFirstName">First Name</label>
+            <label for="regFirstName" data-i18n="labelFirstName">First Name</label>
             <input type="text" id="regFirstName" placeholder="e.g., John">
         </div>
 
         <div class="form-group">
-            <label for="regLastName">Last Name</label>
+            <label for="regLastName" data-i18n="labelLastName">Last Name</label>
             <input type="text" id="regLastName" placeholder="e.g., Doe">
         </div>
 
@@ -74,116 +260,228 @@
         </div>
 
         <div class="form-group">
-            <label for="regPassword">Password (Min 6 chars)</label>
+            <label for="regPassword" data-i18n="labelPasswordMin">Password (Min 6 chars)</label>
             <input type="password" id="regPassword">
         </div>
 
         <div class="form-group">
-            <label for="regConfirmPassword">Confirm Password</label>
+            <label for="regConfirmPassword" data-i18n="labelConfirmPassword">Confirm Password</label>
             <input type="password" id="regConfirmPassword">
         </div>
 
-        <button onclick="handleStudentRegister()">Register as Student</button>
-        <p class="subtitle link"><a href="#" onclick="showCard('loginBox')">Back to Sign In</a></p>
+        <button onclick="handleStudentRegister()" data-i18n="btnRegisterStudent">Register as Student</button>
+        <p class="subtitle link"><a href="#" onclick="showCard('loginBox')" data-i18n="linkBackSignIn">Back to Sign In</a></p>
+
+        <footer style="margin-top: 25px; text-align: center; font-size: 11px; color: #6b7280; letter-spacing: 0.3px;" data-i18n="copyright">
+            &copy; 2026 Matheus Dias. All rights reserved. Licensed under MIT Guidelines.
+        </footer>
     </div>
 
     <div class="container hidden" id="teacherRegisterBox">
-        <h1>Teacher Staff Portal</h1>
-        <p class="subtitle">Authorized institutional registration only</p>
+        <h1 data-i18n="regTeacherTitle">Teacher Staff Portal</h1>
+        <p class="subtitle" data-i18n="regTeacherSubtitle">Authorized institutional registration only</p>
 
         <div class="form-group">
-            <label for="tFirstName">First Name</label>
-            <input type="text" id="tFirstName" placeholder="e.g., Jane">
+            <label for="tFirstName" data-i18n="labelFirstName">First Name</label>
+            <input type="text" id="tFirstName">
         </div>
 
         <div class="form-group">
-            <label for="tLastName">Last Name</label>
-            <input type="text" id="tLastName" placeholder="e.g., Smith">
+            <label for="tLastName" data-i18n="labelLastName">Last Name</label>
+            <input type="text" id="tLastName">
         </div>
 
         <div class="form-group">
-            <label for="tEmail">Institutional Email</label>
-            <input type="email" id="tEmail" placeholder="teacher@school.com">
+            <label for="tEmail" data-i18n="labelInstEmail">Institutional Email</label>
+            <input type="email" id="tEmail">
         </div>
 
         <div class="form-group">
-            <label for="tPassword">Password (Min 6 chars)</label>
+            <label for="tPassword" data-i18n="labelPasswordMin">Password (Min 6 chars)</label>
             <input type="password" id="tPassword">
         </div>
 
         <div class="form-group">
-            <label for="tAccessKey">Institutional Access Key</label>
-            <input type="password" id="tAccessKey" placeholder="Enter security token">
+            <label for="tAccessKey" data-i18n="labelAccessKey">Institutional Access Key</label>
+            <input type="text" id="tAccessKey">
         </div>
 
-        <button onclick="handleTeacherRegister()" style="background-color: #e05555;">Verify &amp; Save Staff Account</button>
-        <p class="subtitle link"><a href="#" onclick="showCard('loginBox')">Back to Sign In</a></p>
+        <button onclick="handleTeacherRegister()" data-i18n="btnRegisterTeacher">Verify &amp; Save Staff Account</button>
+        <p class="subtitle link"><a href="#" onclick="showCard('loginBox')" data-i18n="linkBackSignIn">Back to Sign In</a></p>
+
+        <footer style="margin-top: 25px; text-align: center; font-size: 11px; color: #6b7280; letter-spacing: 0.3px;" data-i18n="copyright">
+            &copy; 2026 Matheus Dias. All rights reserved. Licensed under MIT Guidelines.
+        </footer>
     </div>
 
     <script>
+        const translations = {
+            en: {
+                flagIcon: "🇺🇸",
+                flagLabel: "Global | EN",
+                drawerTitle: "Your location",
+                loginTitle: "Login",
+                loginSubtitle: "Sign in with your email to continue",
+                labelPassword: "Password",
+                btnSignIn: "Sign in",
+                linkCreateStudent: "Create student account",
+                linkTeacherClick: "Are you a teacher? Click here",
+                securityNotice: "🛡️ SECURITY NOTICE: Institutional staff will NEVER ask for your password or Student ID (RA) via email or chat.",
+                copyright: "© 2026 Matheus Dias. All rights reserved. Licensed under MIT Guidelines.",
+                regStudentTitle: "Student Registration",
+                regStudentSubtitle: "Create your immutable student account",
+                labelFirstName: "First Name",
+                labelLastName: "Last Name",
+                labelPasswordMin: "Password (Min 6 chars)",
+                labelConfirmPassword: "Confirm Password",
+                btnRegisterStudent: "Register as Student",
+                linkBackSignIn: "Back to Sign In",
+                regTeacherTitle: "Teacher Staff Portal",
+                regTeacherSubtitle: "Authorized institutional registration only",
+                labelInstEmail: "Institutional Email",
+                labelAccessKey: "Institutional Access Key",
+                btnRegisterTeacher: "Verify & Save Staff Account",
+                alertEmailFormat: "Security Error: Please enter a valid email format.",
+                alertWrongCreds: "Wrong email or password. Attempt ",
+                alertBruteForce: "Security Alert: 3 failed attempts detected. Authentication module locked for 30 seconds to prevent automated dictionary attacks.",
+                alertLocked: "Security Block: Too many login attempts. System is cooling down. Please wait.",
+                alertFillFields: "Validation Error: Fill in all the fields.",
+                alertNameLength: "Security Error: Names must contain only letters and be at least 2 characters long.",
+                alertPassLength: "Security Error: Password must be at least 6 characters long.",
+                alertPassMatch: "Validation Error: Passwords do not match.",
+                alertEnumMitigation: "Unable to complete registration with the information provided. Please verify your email or try again later.",
+                alertAccessDenied: "Access Denied: Invalid Institutional Access Key.",
+                alertTeacherSuccess: "Teacher Staff account authorized and created successfully!",
+                alertStudentSuccess: "Account securely processed!\n\nYour PERMANENT Student ID (RA) is: ",
+                alertPhishingNotice: "\n\n⚠️ IMPORTANT: Keep this number secret. If you receive any message asking for this token to 'update your registration', delete it immediately. It is a phishing attempt."
+            },
+            pt: {
+                flagIcon: "🇧🇷",
+                flagLabel: "Brazil | PT",
+                drawerTitle: "Sua localização",
+                loginTitle: "Entrar",
+                loginSubtitle: "Faça login com seu e-mail para continuar",
+                labelPassword: "Senha",
+                btnSignIn: "Entrar",
+                linkCreateStudent: "Criar conta de estudante",
+                linkTeacherClick: "Você é um professor? Clique aqui",
+                securityNotice: "🛡️ AVISO DE SEGURANÇA: A equipe institucional NUNCA solicitará sua senha ou RA por e-mail ou chat.",
+                copyright: "© 2026 Matheus Dias. Todos os direitos reservados. Licenciado sob as Diretrizes MIT.",
+                regStudentTitle: "Cadastro de Aluno",
+                regStudentSubtitle: "Crie sua conta acadêmica imutável",
+                labelFirstName: "Primeiro Nome",
+                labelLastName: "Sobrenome",
+                labelPasswordMin: "Senha (Mín. 6 caracteres)",
+                labelConfirmPassword: "Confirmar Senha",
+                btnRegisterStudent: "Cadastrar como Aluno",
+                linkBackSignIn: "Voltar para o Login",
+                regTeacherTitle: "Portal do Corpo Docente",
+                regTeacherSubtitle: "Apenas registros institucionais autorizados",
+                labelInstEmail: "E-mail Institucional",
+                labelAccessKey: "Chave de Acesso Institucional",
+                btnRegisterTeacher: "Verificar e Salvar Conta Docente",
+                alertEmailFormat: "Erro de Segurança: Insira um formato de e-mail válido.",
+                alertWrongCreds: "E-mail ou senha incorretos. Tentativa ",
+                alertBruteForce: "Alerta de Segurança: 3 tentativas falhas detectadas. Módulo bloqueado por 30 segundos para evitar ataques automatizados de dicionário.",
+                alertLocked: "Bloqueio de Segurança: Muitas tentativas de login. O sistema está resfriando. Por favor, aguarde.",
+                alertFillFields: "Erro de Validação: Preencha todos os campos.",
+                alertNameLength: "Erro de Segurança: Os nomes devem conter apenas letras e ter pelo menos 2 caracteres.",
+                alertPassLength: "Erro de Segurança: A senha deve ter pelo menos 6 caracteres.",
+                alertPassMatch: "Erro de Validação: As senhas não coincidem.",
+                alertEnumMitigation: "Não foi possível concluir o cadastro com os dados informados. Verifique seu e-mail ou tente novamente mais tarde.",
+                alertAccessDenied: "Acesso Negado: Chave de Acesso Institucional Inválida.",
+                alertTeacherSuccess: "Conta de Professor autorizada e criada com sucesso!",
+                alertStudentSuccess: "Conta processada com segurança!\n\nSeu ID de Estudante (RA) PERMANENTE é: ",
+                alertPhishingNotice: "\n\n⚠️ IMPORTANTE: Guarde este número em segredo. Se receber qualquer mensagem solicitando este código para 'atualizar cadastro', delete imediatamente. É uma tentativa de phishing."
+            }
+        };
+
+        let currentLang = localStorage.getItem('preferredLang') || 'en';
+
+        function toggleDrawer(open) {
+            const drawer = document.getElementById('langDrawer');
+            const overlay = document.getElementById('overlay');
+            if (open) {
+                overlay.style.display = 'block';
+                setTimeout(() => drawer.classList.add('open'), 10);
+            } else {
+                drawer.classList.remove('open');
+                setTimeout(() => overlay.style.display = 'none', 300);
+            }
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('preferredLang', lang);
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+            toggleDrawer(false);
+        }
+
+        window.onload = () => {
+            changeLanguage(currentLang);
+        };
+
         if (!localStorage.getItem('usersDB')) {
-            var db = {
+            const defaultDB = {
                 "teacher@school.com": { password: btoa("teacher123"), role: "teacher", name: btoa("Prof. Matheus"), studentID: "" },
                 "student@school.com": { password: btoa("student123"), role: "student", name: btoa("Matheus Dias"), studentID: "123456" }
             };
-            localStorage.setItem('usersDB', JSON.stringify(db));
+            localStorage.setItem('usersDB', JSON.stringify(defaultDB));
         }
 
-        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        var nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ]{2,}$/;
-
-        var loginAttempts = 0;
-        var isLocked = false;
+        const emailRegex = /^[^\s@]+@[^\s@]+.[^\s@]+$/;
+        const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ]{2,}$/;
+        let loginAttempts = 0;
+        let isLocked = false;
 
         function showCard(targetId) {
-            var cards = ['loginBox', 'registerBox', 'teacherRegisterBox'];
-            for (var i = 0; i < cards.length; i++) {
-                document.getElementById(cards[i]).classList.add('hidden');
-            }
+            ['loginBox', 'registerBox', 'teacherRegisterBox'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
             document.getElementById(targetId).classList.remove('hidden');
         }
 
         function handleLogin() {
             if (isLocked) {
-                alert("Security Block: Too many login attempts. System is cooling down. Please wait.");
+                alert(translations[currentLang].alertLocked);
                 return;
             }
-
-            var email = document.getElementById('loginEmail').value.trim().toLowerCase();
-            var password = document.getElementById('loginPassword').value;
-            var users = JSON.parse(localStorage.getItem('usersDB'));
-            var user = users[email];
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
+            const users = JSON.parse(localStorage.getItem('usersDB'));
+            const user = users[email];
 
             if (!emailRegex.test(email)) {
-                alert("Security Error: Please enter a valid email format.");
+                alert(translations[currentLang].alertEmailFormat);
                 return;
             }
 
             if (!user || atob(user.password) !== password) {
                 loginAttempts++;
-
                 if (loginAttempts >= 3) {
                     isLocked = true;
-                    var loginBtn = document.getElementById('loginBtn');
+                    const loginBtn = document.getElementById('loginBtn');
                     loginBtn.disabled = true;
-                    loginBtn.innerText = "Locked (30s)";
+                    loginBtn.innerText = currentLang === 'en' ? "Locked (30s)" : "Bloqueado (30s)";
                     loginBtn.style.backgroundColor = "#4b5563";
                     loginBtn.style.cursor = "not-allowed";
-
-                    alert("Security Alert: 3 failed attempts detected. Authentication module locked for 30 seconds to prevent automated dictionary attacks.");
-
-                    setTimeout(function () {
+                    alert(translations[currentLang].alertBruteForce);
+                    setTimeout(() => {
                         isLocked = false;
                         loginAttempts = 0;
                         loginBtn.disabled = false;
-                        loginBtn.innerText = "Sign in";
+                        loginBtn.innerText = translations[currentLang].btnSignIn;
                         loginBtn.style.backgroundColor = "#3a7bd5";
                         loginBtn.style.cursor = "pointer";
                     }, 30000);
                     return;
                 }
-
-                alert("Wrong email or password. Attempt " + loginAttempts + "/3");
+                alert(translations[currentLang].alertWrongCreds + loginAttempts + "/3");
                 return;
             }
 
@@ -198,112 +496,101 @@
         }
 
         function handleStudentRegister() {
-            var firstName = document.getElementById('regFirstName').value.trim();
-            var lastName = document.getElementById('regLastName').value.trim();
-            var email = document.getElementById('regEmail').value.trim().toLowerCase();
-            var password = document.getElementById('regPassword').value;
-            var confirmPassword = document.getElementById('regConfirmPassword').value;
+            const firstName = document.getElementById('regFirstName').value.trim();
+            const lastName = document.getElementById('regLastName').value.trim();
+            const email = document.getElementById('regEmail').value.trim().toLowerCase();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
 
             if (!firstName || !lastName || !email || !password || !confirmPassword) {
-                alert("Validation Error: Fill in all the fields.");
+                alert(translations[currentLang].alertFillFields);
                 return;
             }
-
             if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
-                alert("Security Error: Names must contain only letters and be at least 2 characters long.");
+                alert(translations[currentLang].alertNameLength);
                 return;
             }
-
             if (!emailRegex.test(email)) {
-                alert("Security Error: Invalid email format. Use pattern: user@domain.com");
+                alert(translations[currentLang].alertEmailFormat);
                 return;
             }
-
             if (password.length < 6) {
-                alert("Security Error: Password must be at least 6 characters long.");
+                alert(translations[currentLang].alertPassLength);
                 return;
             }
-
             if (password !== confirmPassword) {
-                alert("Validation Error: Passwords do not match.");
+                alert(translations[currentLang].alertPassMatch);
                 return;
             }
 
-            var users = JSON.parse(localStorage.getItem('usersDB')) || {};
-
+            const users = JSON.parse(localStorage.getItem('usersDB')) || {};
             if (users[email]) {
-                alert("Unable to complete registration with the information provided. Please verify your email or try again later.");
+                alert(translations[currentLang].alertEnumMitigation);
                 return;
             }
 
-            var fullName = firstName.charAt(0).toUpperCase() + firstName.slice(1) + " " + lastName.charAt(0).toUpperCase() + lastName.slice(1);
-            var studentId = "";
+            const fullName = firstName.charAt(0).toUpperCase() + firstName.slice(1) + " " + lastName.charAt(0).toUpperCase() + lastName.slice(1);
 
-            var sameName = Object.values(users).find(function (u) {
-                return atob(u.name).toLowerCase() === fullName.toLowerCase();
-            });
-            if (sameName) {
-                studentId = sameName.studentID;
+            let existingStudentID = "";
+            const duplicateNameUser = Object.values(users).find(u => atob(u.name).toLowerCase() === fullName.toLowerCase());
+            if (duplicateNameUser) {
+                existingStudentID = duplicateNameUser.studentID;
             }
 
-            if (!studentId) {
+            if (!existingStudentID) {
                 do {
-                    studentId = Math.floor(100000 + Math.random() * 900000).toString();
-                } while (Object.values(users).some(function (u) { return u.studentID === studentId; }));
+                    existingStudentID = Math.floor(100000 + Math.random() * 900000).toString();
+                    var idExists = Object.values(users).some(u => u.studentID === existingStudentID);
+                } while (idExists);
             }
 
             users[email] = {
                 password: btoa(password),
                 role: "student",
                 name: btoa(fullName),
-                studentID: studentId
+                studentID: existingStudentID
             };
 
             localStorage.setItem('usersDB', JSON.stringify(users));
-            alert("Account securely processed!\n\nYour PERMANENT Student ID (RA) is: " + studentId + "\n\nIMPORTANT: Keep this number secret. If you receive any message asking for this token to \"update your registration\", delete it immediately. It is a phishing attempt.");
+            alert(translations[currentLang].alertStudentSuccess + existingStudentID + translations[currentLang].alertPhishingNotice);
             showCard('loginBox');
         }
 
         function handleTeacherRegister() {
-            var firstName = document.getElementById('tFirstName').value.trim();
-            var lastName = document.getElementById('tLastName').value.trim();
-            var email = document.getElementById('tEmail').value.trim().toLowerCase();
-            var password = document.getElementById('tPassword').value;
-            var accessKey = document.getElementById('tAccessKey').value.trim();
+            const firstName = document.getElementById('tFirstName').value.trim();
+            const lastName = document.getElementById('tLastName').value.trim();
+            const email = document.getElementById('tEmail').value.trim().toLowerCase();
+            const password = document.getElementById('tPassword').value;
+            const accessKey = document.getElementById('tAccessKey').value.trim();
 
             if (!firstName || !lastName || !email || !password || !accessKey) {
-                alert("Validation Error: Fill in all institutional fields.");
+                alert(translations[currentLang].alertFillFields);
                 return;
             }
-
             if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
-                alert("Security Error: Names must contain only letters and be at least 2 characters long.");
+                alert(translations[currentLang].alertNameLength);
                 return;
             }
-
             if (!emailRegex.test(email)) {
-                alert("Security Error: Invalid institutional email format.");
+                alert(translations[currentLang].alertEmailFormat);
                 return;
             }
-
             if (password.length < 6) {
-                alert("Security Error: Password must be at least 6 characters long.");
+                alert(translations[currentLang].alertPassLength);
                 return;
             }
-
             if (btoa(accessKey) !== "U0NIT09MMjAyNg==") {
-                alert("Access Denied: Invalid Institutional Access Key.");
+                alert(translations[currentLang].alertAccessDenied);
                 return;
             }
 
-            var users = JSON.parse(localStorage.getItem('usersDB')) || {};
-
+            const users = JSON.parse(localStorage.getItem('usersDB')) || {};
             if (users[email]) {
-                alert("Unable to complete registration with the information provided. Please verify your email or try again later.");
+                alert(translations[currentLang].alertEnumMitigation);
                 return;
             }
 
-            var fullName = "Prof. " + firstName.charAt(0).toUpperCase() + firstName.slice(1) + " " + lastName.charAt(0).toUpperCase() + lastName.slice(1);
+            const fullName = "Prof. " + firstName.charAt(0).toUpperCase() + firstName.slice(1) + " " + lastName.charAt(0).toUpperCase() + lastName.slice(1);
 
             users[email] = {
                 password: btoa(password),
@@ -313,7 +600,7 @@
             };
 
             localStorage.setItem('usersDB', JSON.stringify(users));
-            alert("Teacher Staff account authorized and created successfully!");
+            alert(translations[currentLang].alertTeacherSuccess);
             showCard('loginBox');
         }
     </script>
