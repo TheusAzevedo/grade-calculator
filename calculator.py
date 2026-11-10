@@ -1,29 +1,32 @@
-# Requests student data
-name = input("Enter the student's name: ")
+name = input("Student name: ").strip()
+while name == "":
+    name = input("Name can't be empty: ").strip()
 
-# Requests the three grades with basic validation
-try:
-    grade1 = float(input("Enter the first grade: "))
-    grade2 = float(input("Enter the second grade: "))
-    grade3 = float(input("Enter the third grade: "))
-except ValueError:
-    print("Error: Please enter valid numbers only.")
-    exit()
+grades = []
+for i in range(1, 4):
+    while True:
+        try:
+            g = float(input(f"Grade {i}: "))
+        except ValueError:
+            print("Enter a number.")
+            continue
+        if 0 <= g <= 10:
+            grades.append(g)
+            break
+        print("Grade must be between 0 and 10.")
 
-# Calculates the average
-average = (grade1 + grade2 + grade3) / 3
+avg = sum(grades) / 3
 
-# Determines the student's status
-if average >= 7:
+if avg >= 7:
     status = "Approved"
-elif average >= 5:
+elif avg >= 5:
     status = "Remedial"
 else:
     status = "Failed"
 
-# Displays the final result
-print("\n" + "="*40)
-print(f"Student's name: {name}")
-print(f"Average obtained: {average:.2f}")
+print()
+print(name)
+for i, g in enumerate(grades, 1):
+    print(f"Grade {i}: {g:.1f}")
+print(f"Average: {avg:.2f}")
 print(f"Status: {status}")
-print("="*40)
