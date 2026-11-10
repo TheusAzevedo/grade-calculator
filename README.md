@@ -1,6 +1,6 @@
-![GitHub repo size](https://shields.io)
-![GitHub language count](https://shields.io)
-![GitHub last commit](https://shields.io)
+![Repo Size](https://shields.io)
+![Languages](https://shields.io)
+![Status](https://shields.io)
 
 # Integrated Academic Portal & Grade Calculator
 
