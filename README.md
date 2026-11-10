@@ -1,6 +1,5 @@
-![Repository](https://shields.io)
-![Stack](https://shields.io)
-![Project-Status](https://shields.io)
+| 📁 Repository: Optimized | 🛠️ Stack: Python & JS | 🚀 Status: Active |
+| :--- | :--- | :--- |
 
 # Integrated Academic Portal & Grade Calculator
 
