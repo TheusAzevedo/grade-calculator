@@ -41,9 +41,13 @@
             <input type="password" id="loginPassword">
         </div>
 
-        <button onclick="handleLogin()">Sign in</button>
+        <button id="loginBtn" onclick="handleLogin()">Sign in</button>
         <p class="subtitle link"><a href="#" onclick="showCard('registerBox')">Create student account</a></p>
         <a href="#" class="teacher-link" onclick="showCard('teacherRegisterBox')">Are you a teacher? Click here</a>
+
+        <p style="color: #ef4444; font-size: 11px; margin-top: 20px; text-align: center; font-weight: bold;">
+            SECURITY NOTICE: Institutional staff will NEVER ask for your password or Student ID (RA) via email or chat.
+        </p>
     </div>
 
     <div class="container hidden" id="registerBox">
@@ -124,6 +128,9 @@
         var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         var nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ]{2,}$/;
 
+        var loginAttempts = 0;
+        var isLocked = false;
+
         function showCard(targetId) {
             var cards = ['loginBox', 'registerBox', 'teacherRegisterBox'];
             for (var i = 0; i < cards.length; i++) {
@@ -133,6 +140,11 @@
         }
 
         function handleLogin() {
+            if (isLocked) {
+                alert("Security Block: Too many login attempts. System is cooling down. Please wait.");
+                return;
+            }
+
             var email = document.getElementById('loginEmail').value.trim().toLowerCase();
             var password = document.getElementById('loginPassword').value;
             var users = JSON.parse(localStorage.getItem('usersDB'));
@@ -144,10 +156,34 @@
             }
 
             if (!user || atob(user.password) !== password) {
-                alert("Wrong email or password.");
+                loginAttempts++;
+
+                if (loginAttempts >= 3) {
+                    isLocked = true;
+                    var loginBtn = document.getElementById('loginBtn');
+                    loginBtn.disabled = true;
+                    loginBtn.innerText = "Locked (30s)";
+                    loginBtn.style.backgroundColor = "#4b5563";
+                    loginBtn.style.cursor = "not-allowed";
+
+                    alert("Security Alert: 3 failed attempts detected. Authentication module locked for 30 seconds to prevent automated dictionary attacks.");
+
+                    setTimeout(function () {
+                        isLocked = false;
+                        loginAttempts = 0;
+                        loginBtn.disabled = false;
+                        loginBtn.innerText = "Sign in";
+                        loginBtn.style.backgroundColor = "#3a7bd5";
+                        loginBtn.style.cursor = "pointer";
+                    }, 30000);
+                    return;
+                }
+
+                alert("Wrong email or password. Attempt " + loginAttempts + "/3");
                 return;
             }
 
+            loginAttempts = 0;
             localStorage.setItem('currentUser', JSON.stringify({
                 email: email,
                 name: atob(user.name),
@@ -169,12 +205,8 @@
                 return;
             }
 
-            if (!nameRegex.test(firstName)) {
-                alert("Security Error: First Name must contain only letters and be at least 2 characters long.");
-                return;
-            }
-            if (!nameRegex.test(lastName)) {
-                alert("Security Error: Last Name must contain only letters and be at least 2 characters long.");
+            if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
+                alert("Security Error: Names must contain only letters and be at least 2 characters long.");
                 return;
             }
 
@@ -195,21 +227,19 @@
 
             var users = JSON.parse(localStorage.getItem('usersDB')) || {};
 
-            if (users[email] && users[email].role === 'teacher') {
-                alert("Conflict Error: This email is already registered as a Teacher account.");
+            if (users[email]) {
+                alert("Unable to complete registration with the information provided. Please verify your email or try again later.");
                 return;
             }
 
             var fullName = firstName.charAt(0).toUpperCase() + firstName.slice(1) + " " + lastName.charAt(0).toUpperCase() + lastName.slice(1);
-            var studentId = users[email] ? users[email].studentID : "";
+            var studentId = "";
 
-            if (!studentId) {
-                var sameName = Object.values(users).find(function (u) {
-                    return atob(u.name).toLowerCase() === fullName.toLowerCase();
-                });
-                if (sameName) {
-                    studentId = sameName.studentID;
-                }
+            var sameName = Object.values(users).find(function (u) {
+                return atob(u.name).toLowerCase() === fullName.toLowerCase();
+            });
+            if (sameName) {
+                studentId = sameName.studentID;
             }
 
             if (!studentId) {
@@ -226,7 +256,7 @@
             };
 
             localStorage.setItem('usersDB', JSON.stringify(users));
-            alert("Student account securely processed!\n\nYour PERMANENT Student ID (RA) is: " + studentId);
+            alert("Account securely processed!\n\nYour PERMANENT Student ID (RA) is: " + studentId + "\n\nIMPORTANT: Keep this number secret. If you receive any message asking for this token to \"update your registration\", delete it immediately. It is a phishing attempt.");
             showCard('loginBox');
         }
 
@@ -264,8 +294,8 @@
 
             var users = JSON.parse(localStorage.getItem('usersDB')) || {};
 
-            if (users[email] && users[email].role === 'student') {
-                alert("Conflict Error: This email is already registered as a Student account.");
+            if (users[email]) {
+                alert("Unable to complete registration with the information provided. Please verify your email or try again later.");
                 return;
             }
 
