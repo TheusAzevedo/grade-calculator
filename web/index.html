@@ -16,7 +16,7 @@
             margin-top: 20px;
             max-width: 460px;
         }
-        
+
         .teacher-link {
             display: block;
             margin-top: 12px;
@@ -27,7 +27,6 @@
     </style>
 </head>
 <body>
-    <!-- 1️⃣ CARD DE SIGN IN (LOGIN VIA EMAIL) -->
     <div class="container" id="loginBox">
         <h1>Login</h1>
         <p class="subtitle">Sign in with your email to continue</p>
@@ -47,7 +46,6 @@
         <a href="#" class="teacher-link" onclick="showCard('teacherRegisterBox')">Are you a teacher? Click here</a>
     </div>
 
-    <!-- 2️⃣ CARD DE REGISTRO EXCLUSIVO DE ESTUDANTES -->
     <div class="container hidden" id="registerBox">
         <h1>Student Registration</h1>
         <p class="subtitle">Create your immutable student account</p>
@@ -81,7 +79,6 @@
         <p class="subtitle link"><a href="#" onclick="showCard('loginBox')">Back to Sign In</a></p>
     </div>
 
-    <!-- 3️⃣ CARD DE REGISTRO EXCLUSIVO DE PROFESSORES (COM CHAVE DE ACESSO) -->
     <div class="container hidden" id="teacherRegisterBox">
         <h1>Teacher Staff Portal</h1>
         <p class="subtitle">Authorized institutional registration only</p>
@@ -116,7 +113,6 @@
     </div>
 
     <script>
-        // Inicializa a base mock se estiver limpa
         if (!localStorage.getItem('usersDB')) {
             localStorage.setItem('usersDB', JSON.stringify({
                 "teacher@school.com": { password: "teacher123", role: "teacher", name: "Prof. Matheus", studentID: "" },
@@ -124,7 +120,6 @@
             }));
         }
 
-        // Gerenciador inteligente de transição de telas
         function showCard(targetId) {
             ['loginBox', 'registerBox', 'teacherRegisterBox'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
@@ -143,16 +138,16 @@
                 return;
             }
 
-            localStorage.setItem('currentUser', JSON.stringify({ 
-                email: email, 
-                name: user.name, 
+            localStorage.setItem('currentUser', JSON.stringify({
+                email: email,
+                name: user.name,
                 role: user.role,
-                studentID: user.studentID 
+                studentID: user.studentID
             }));
+
             location.href = user.role === 'teacher' ? 'teacher.html' : 'student.html';
         }
 
-        // CADASTRO EXCLUSIVO DE ALUNOS
         function handleStudentRegister() {
             const firstName = document.getElementById('regFirstName').value.trim();
             const lastName = document.getElementById('regLastName').value.trim();
@@ -171,7 +166,7 @@
             }
 
             const users = JSON.parse(localStorage.getItem('usersDB')) || {};
-            
+
             if (users[email] && users[email].role === 'teacher') {
                 alert("This email is already registered as a Teacher account.");
                 return;
@@ -206,7 +201,6 @@
             showCard('loginBox');
         }
 
-        // CADASTRO EXCLUSIVO DE PROFESSORES (COM VALIDAÇÃO DE CHAVE)
         function handleTeacherRegister() {
             const firstName = document.getElementById('tFirstName').value.trim();
             const lastName = document.getElementById('tLastName').value.trim();
