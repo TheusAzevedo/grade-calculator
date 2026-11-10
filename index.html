@@ -7,6 +7,23 @@
     <link rel="stylesheet" href="style.css">
     <style>
         .hidden { display: none !important; }
+
+        select {
+            width: 100%;
+            padding: 9px;
+            background-color: #313743;
+            border: 1px solid #454c59;
+            border-radius: 5px;
+            color: #fff;
+        }
+
+        .link {
+            margin-top: 15px;
+        }
+
+        #registerBox {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -25,12 +42,10 @@
         </div>
 
         <button onclick="handleLogin()">Sign in</button>
-        <p class="subtitle" style="margin-top: 15px;">
-            <a href="#" onclick="toggleCards()" style="color: #4a90d9;">Create account / change password</a>
-        </p>
+        <p class="subtitle link"><a href="#" onclick="toggleCards()">Create account / change password</a></p>
     </div>
 
-    <div class="container hidden" id="registerBox" style="margin-top: 20px;">
+    <div class="container hidden" id="registerBox">
         <h1>Account</h1>
         <p class="subtitle">Create a user or change a password</p>
 
@@ -46,16 +61,14 @@
 
         <div class="form-group">
             <label for="regRole">Role</label>
-            <select id="regRole" style="width: 100%; padding: 9px; background-color: #313743; border: 1px solid #454c59; border-radius: 5px; color: #fff;">
+            <select id="regRole">
                 <option value="student">Student</option>
                 <option value="teacher">Teacher</option>
             </select>
         </div>
 
         <button onclick="handleRegister()">Save</button>
-        <p class="subtitle" style="margin-top: 15px;">
-            <a href="#" onclick="toggleCards()" style="color: #4a90d9;">Back</a>
-        </p>
+        <p class="subtitle link"><a href="#" onclick="toggleCards()">Back</a></p>
     </div>
 
     <script>
@@ -72,7 +85,7 @@
         }
 
         function handleLogin() {
-            const username = document.getElementById('username').value.trim();
+            const username = document.getElementById('username').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
             const users = JSON.parse(localStorage.getItem('usersDB'));
             const user = users[username];
@@ -82,12 +95,12 @@
                 return;
             }
 
-            localStorage.setItem('currentUser', JSON.stringify({ name: user.name, role: user.role }));
-            window.location.href = user.role === 'teacher' ? 'teacher.html' : 'calculator.html';
+            localStorage.setItem('currentUser', JSON.stringify({ username: username, name: user.name, role: user.role }));
+            location.href = user.role === 'teacher' ? 'teacher.html' : 'student.html';
         }
 
         function handleRegister() {
-            const username = document.getElementById('regUsername').value.trim();
+            const username = document.getElementById('regUsername').value.trim().toLowerCase();
             const password = document.getElementById('regPassword').value;
             const role = document.getElementById('regRole').value;
 
