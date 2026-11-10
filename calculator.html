@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="container" id="loginBox">
+        <h1>Login</h1>
+        <p class="subtitle">Sign in to continue</p>
+
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username">
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password">
+        </div>
+
+        <button onclick="handleLogin()">Sign in</button>
+        <p class="subtitle" style="margin-top: 15px;">
+            <a href="#" onclick="toggleCards()" style="color: #4a90d9;">Create account / change password</a>
+        </p>
+    </div>
+
+    <div class="container hidden" id="registerBox" style="margin-top: 20px;">
+        <h1>Account</h1>
+        <p class="subtitle">Create a user or change a password</p>
+
+        <div class="form-group">
+            <label for="regUsername">Username</label>
+            <input type="text" id="regUsername">
+        </div>
+
+        <div class="form-group">
+            <label for="regPassword">Password</label>
+            <input type="password" id="regPassword">
+        </div>
+
+        <div class="form-group">
+            <label for="regRole">Role</label>
+            <select id="regRole" style="width: 100%; padding: 9px; background-color: #313743; border: 1px solid #454c59; border-radius: 5px; color: #fff;">
+                <option value="student">Student</option>
+                <option value="teacher">Teacher</option>
+            </select>
+        </div>
+
+        <button onclick="handleRegister()">Save</button>
+        <p class="subtitle" style="margin-top: 15px;">
+            <a href="#" onclick="toggleCards()" style="color: #4a90d9;">Back</a>
+        </p>
+    </div>
+
+    <script>
+        if (!localStorage.getItem('usersDB')) {
+            localStorage.setItem('usersDB', JSON.stringify({
+                teacher: { password: "teacher123", role: "teacher", name: "Prof. Matheus" },
+                student: { password: "student123", role: "student", name: "Matheus Dias" }
+            }));
+        }
+
+        function toggleCards() {
+            document.getElementById('loginBox').classList.toggle('hidden');
+            document.getElementById('registerBox').classList.toggle('hidden');
+        }
+
+        function handleLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const users = JSON.parse(localStorage.getItem('usersDB'));
+            const user = users[username];
+
+            if (!user || user.password !== password) {
+                alert("Wrong username or password.");
+                return;
+            }
+
+            localStorage.setItem('currentUser', JSON.stringify({ name: user.name, role: user.role }));
+            window.location.href = user.role === 'teacher' ? 'teacher.html' : 'calculator.html';
+        }
+
+        function handleRegister() {
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const role = document.getElementById('regRole').value;
+
+            if (!username || !password) {
+                alert("Fill in all the fields.");
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('usersDB'));
+            users[username] = {
+                password: password,
+                role: role,
+                name: username[0].toUpperCase() + username.slice(1)
+            };
+
+            localStorage.setItem('usersDB', JSON.stringify(users));
+            alert("Saved.");
+            toggleCards();
+        }
+    </script>
+</body>
+</html>
