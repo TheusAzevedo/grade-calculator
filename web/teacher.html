@@ -53,8 +53,8 @@
         <p class="subtitle">Enter the grades for a student.</p>
 
         <div class="form-group">
-            <label for="studentName">Student username</label>
-            <input type="text" id="studentName">
+            <label for="studentID">Student ID</label>
+            <input type="text" id="studentID">
         </div>
         <div class="form-group">
             <label for="grade1">Grade 1</label>
@@ -98,7 +98,9 @@
 
             history.forEach(item => {
                 const row = document.createElement('tr');
-                [item.name, item.average, item.status].forEach(text => {
+                const student = item.id + ' - ' + item.studentName;
+
+                [student, item.average, item.status].forEach(text => {
                     const cell = document.createElement('td');
                     cell.textContent = text;
                     row.appendChild(cell);
@@ -108,11 +110,11 @@
         }
 
         function saveStudentGrade() {
-            const name = document.getElementById('studentName').value.trim().toLowerCase();
+            const studentID = document.getElementById('studentID').value.trim();
             const grades = ['grade1', 'grade2', 'grade3']
                 .map(id => parseFloat(document.getElementById(id).value));
 
-            if (!name || grades.some(isNaN)) {
+            if (!studentID || grades.some(isNaN)) {
                 alert("Fill in all the fields.");
                 return;
             }
@@ -122,18 +124,34 @@
                 return;
             }
 
+            const users = JSON.parse(localStorage.getItem('usersDB')) || {};
+            const username = Object.keys(users).find(key => users[key].studentID === studentID);
+
+            if (!username) {
+                alert("Student ID not found.");
+                return;
+            }
+
             const avg = grades.reduce((a, b) => a + b) / 3;
             let status = "Failed";
             if (avg >= 7) status = "Approved";
             else if (avg >= 5) status = "Remedial";
 
             const history = (JSON.parse(localStorage.getItem('gradesHistory')) || [])
-                .filter(item => item.name !== name);
-            history.push({ name: name, average: avg.toFixed(2), status: status });
+                .filter(item => item.id !== studentID);
+
+            history.push({
+                id: studentID,
+                name: username,
+                studentName: users[username].name,
+                average: avg.toFixed(2),
+                status: status
+            });
+
             localStorage.setItem('gradesHistory', JSON.stringify(history));
 
             renderTable();
-            ['studentName', 'grade1', 'grade2', 'grade3'].forEach(id => {
+            ['studentID', 'grade1', 'grade2', 'grade3'].forEach(id => {
                 document.getElementById(id).value = '';
             });
         }

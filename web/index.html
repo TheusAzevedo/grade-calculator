@@ -74,8 +74,8 @@
     <script>
         if (!localStorage.getItem('usersDB')) {
             localStorage.setItem('usersDB', JSON.stringify({
-                teacher: { password: "teacher123", role: "teacher", name: "Prof. Matheus" },
-                student: { password: "student123", role: "student", name: "Matheus Dias" }
+                teacher: { password: "teacher123", role: "teacher", name: "Prof. Matheus", studentID: "" },
+                student: { password: "student123", role: "student", name: "Matheus Dias", studentID: "123456" }
             }));
         }
 
@@ -95,7 +95,12 @@
                 return;
             }
 
-            localStorage.setItem('currentUser', JSON.stringify({ username: username, name: user.name, role: user.role }));
+            localStorage.setItem('currentUser', JSON.stringify({
+                username: username,
+                name: user.name,
+                role: user.role,
+                studentID: user.studentID
+            }));
             location.href = user.role === 'teacher' ? 'teacher.html' : 'student.html';
         }
 
@@ -110,14 +115,30 @@
             }
 
             const users = JSON.parse(localStorage.getItem('usersDB'));
+            let studentID = users[username] ? users[username].studentID : "";
+
+            if (role === 'student' && !studentID) {
+                let taken = true;
+                while (taken) {
+                    studentID = String(Math.floor(100000 + Math.random() * 900000));
+                    taken = Object.values(users).some(u => u.studentID === studentID);
+                }
+            }
+
             users[username] = {
                 password: password,
                 role: role,
-                name: username[0].toUpperCase() + username.slice(1)
+                name: username[0].toUpperCase() + username.slice(1),
+                studentID: role === 'student' ? studentID : ""
             };
 
             localStorage.setItem('usersDB', JSON.stringify(users));
-            alert("Saved.");
+
+            if (role === 'student') {
+                alert("Saved. Your student ID is " + studentID + ". Write it down, the teacher needs it to enter your grades.");
+            } else {
+                alert("Saved.");
+            }
             toggleCards();
         }
     </script>

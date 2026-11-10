@@ -1,13 +1,13 @@
 import os
+import random
 
 users = {
-    "teacher": {"password": "teacher123", "role": "teacher", "name": "Prof. Matheus"},
-    "student": {"password": "student123", "role": "student", "name": "Matheus Dias"},
+    "teacher": {"password": "teacher123", "role": "teacher", "name": "Prof. Matheus", "id": ""},
+    "student": {"password": "student123", "role": "student", "name": "Matheus Dias", "id": "123456"},
 }
 
 history = [
-    {"name": "Ana Silva", "grades": [8.5, 7.5, 9.0], "average": 8.33, "status": "Approved"},
-    {"name": "Bruno Costa", "grades": [4.0, 5.0, 5.5], "average": 4.83, "status": "Failed"},
+    {"id": "123456", "name": "Matheus Dias", "grades": [8.5, 7.5, 9.0], "average": 8.33, "status": "Approved"},
 ]
 
 
@@ -19,7 +19,31 @@ def login():
     clear()
     print("Academic Portal")
     print("-" * 30)
-    username = input("Username: ").strip()
+    print("1. Sign in")
+    print("2. Register")
+    choice = input("> ").strip()
+
+    if choice == "2":
+        clear()
+        username = input("Username: ").strip().lower()
+        if username in users:
+            print("That username is taken.")
+            input("Press Enter to continue...")
+            return None
+        password = input("Password: ").strip()
+        name = input("Full name: ").strip()
+
+        student_id = str(random.randint(100000, 999999))
+        while any(u["id"] == student_id for u in users.values()):
+            student_id = str(random.randint(100000, 999999))
+
+        users[username] = {"password": password, "role": "student", "name": name, "id": student_id}
+        print(f"\nSaved. Your student ID is {student_id}. Write it down.")
+        input("Press Enter to continue...")
+        return None
+
+    clear()
+    username = input("Username: ").strip().lower()
     password = input("Password: ").strip()
 
     user = users.get(username)
@@ -34,12 +58,48 @@ def login():
 def student_menu(user):
     while True:
         clear()
-        print(f"Student - {user['name']}")
-        print("1. Calculate my grade")
+        print(f"Student - {user['name']} ({user['id']})")
+        print("1. My grades")
         print("2. Logout")
         option = input("> ").strip()
 
         if option == "1":
+            clear()
+            record = next((r for r in history if r["id"] == user["id"]), None)
+
+            if record:
+                grades = ", ".join(f"{g:.1f}" for g in record["grades"])
+                print(f"Name: {record['name']}")
+                print(f"Grades: {grades}")
+                print(f"Average: {record['average']:.2f}")
+                print(f"Status: {record['status']}")
+            else:
+                print("No grades yet.")
+            input("\nPress Enter to go back...")
+
+        elif option == "2":
+            break
+
+
+def teacher_menu(user):
+    while True:
+        clear()
+        print(f"Teacher - {user['name']}")
+        print("1. Enter grades")
+        print("2. View history")
+        print("3. Logout")
+        option = input("> ").strip()
+
+        if option == "1":
+            clear()
+            student_id = input("Student ID: ").strip()
+            student = next((u for u in users.values() if u["id"] == student_id), None)
+
+            if not student or student["role"] != "student":
+                print("Student ID not found.")
+                input("Press Enter to go back...")
+                continue
+
             grades = []
             for i in range(1, 4):
                 while True:
@@ -61,41 +121,27 @@ def student_menu(user):
             else:
                 status = "Failed"
 
+            history[:] = [r for r in history if r["id"] != student_id]
             history.append({
-                "name": user["name"],
+                "id": student_id,
+                "name": student["name"],
                 "grades": grades,
                 "average": round(avg, 2),
                 "status": status,
             })
-
-            print(f"\nAverage: {avg:.2f}")
-            print(f"Status: {status}")
-            input("\nPress Enter to go back...")
+            input("\nSaved. Press Enter to continue...")
 
         elif option == "2":
-            break
-
-
-def teacher_menu(user):
-    while True:
-        clear()
-        print(f"Teacher - {user['name']}")
-        print("1. View grade history")
-        print("2. Logout")
-        option = input("> ").strip()
-
-        if option == "1":
             clear()
-            print(f"{'Student':<18}{'Grades':<18}{'Avg':<8}Status")
-            print("-" * 52)
+            print(f"{'ID':<10}{'Student':<18}{'Avg':<8}Status")
+            print("-" * 44)
             if not history:
                 print("No records yet.")
             for r in history:
-                grades = ", ".join(f"{g:.1f}" for g in r["grades"])
-                print(f"{r['name']:<18}{grades:<18}{r['average']:<8.2f}{r['status']}")
+                print(f"{r['id']:<10}{r['name']:<18}{r['average']:<8.2f}{r['status']}")
             input("\nPress Enter to go back...")
 
-        elif option == "2":
+        elif option == "3":
             break
 
 
