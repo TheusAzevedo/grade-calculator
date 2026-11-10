@@ -1,6 +1,6 @@
-![Repo Size](https://shields.io)
-![Languages](https://shields.io)
-![Status](https://shields.io)
+![Repo Size](https://badgen.net)
+![Languages](https://badgen.net)
+![Status](https://badgen.net)
 
 # Integrated Academic Portal & Grade Calculator
 
