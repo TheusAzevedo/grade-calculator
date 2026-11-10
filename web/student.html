@@ -3,88 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Portal - Report Card</title>
+    <title>Report Card</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .pending-badge { 
-            background-color: #475569; 
-            color: #fff; 
-        }
-        .logout { 
-            margin-top: 30px; 
-        }
-        .id-badge-container {
-            background-color: #1e2530;
-            border: 1px solid #3b4250;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            display: inline-block;
-            width: 100%;
-        }
-        .id-label {
-            font-size: 11px;
-            color: #9aa0aa;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 2px;
-        }
-        .id-number {
-            color: #38bdf8;
-            font-size: 18px;
-            font-weight: bold;
-            font-family: 'Courier New', Courier, monospace;
-        }
+        .pending-badge { background-color: #666; color: #fff; }
+        .logout { margin-top: 30px; }
+        .id-display { color: #38bdf8; font-size: 14px; margin-bottom: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Academic Report</h1>
-        <p class="subtitle" id="welcomeMessage">Loading portal...</p>
+        <h1>Report Card</h1>
+        <p class="subtitle" id="welcomeMessage"></p>
 
         <div id="resultCard" class="result-card">
-            <div class="id-badge-container">
-                <div class="id-label">Official Student ID (RA)</div>
-                <div id="studentIDDisplay" class="id-number">------</div>
-            </div>
-
-            <h2 id="studentName" style="margin-bottom: 15px;"></h2>
-            <p class="result-info">Final Average: <span id="average">--</span></p>
+            <div id="studentIDDisplay" class="id-display"></div>
+            <h2 id="studentName"></h2>
+            <p class="result-info">Average: <span id="average">--</span></p>
             <div id="status" class="badge pending-badge">Pending</div>
         </div>
 
-        <p class="subtitle logout"><a href="index.html" onclick="logout()">Logout / Exit</a></p>
+        <p class="subtitle logout"><a href="index.html" onclick="logout()">Logout</a></p>
     </div>
 
     <script>
-        const user = JSON.parse(localStorage.getItem('currentUser'));
+        var user = JSON.parse(localStorage.getItem('currentUser'));
 
         if (!user) {
             location.href = 'index.html';
         } else {
-            const welcome = document.getElementById('welcomeMessage');
-            welcome.textContent = 'Welcome back!';
+            var welcome = document.getElementById('welcomeMessage');
+            welcome.textContent = 'Logged in as ' + user.name;
             document.getElementById('studentName').textContent = user.name;
 
             if (user.studentID) {
-                document.getElementById('studentIDDisplay').textContent = user.studentID;
-            } else {
-                document.getElementById('studentIDDisplay').textContent = "NOT GENERATED";
+                document.getElementById('studentIDDisplay').textContent = 'STUDENT ID: ' + user.studentID;
             }
 
-            const history = JSON.parse(localStorage.getItem('gradesHistory')) || [];
-            const record = history.find(item => item.id === user.studentID);
+            var history = JSON.parse(localStorage.getItem('gradesHistory')) || [];
+            var record = history.find(function (item) { return item.id === user.studentID; });
 
             if (record) {
-                const key = record.status.toLowerCase();
-                const status = document.getElementById('status');
+                var key = record.status.toLowerCase();
+                var status = document.getElementById('status');
 
                 document.getElementById('average').textContent = record.average;
                 document.getElementById('resultCard').className = 'result-card ' + key + '-card';
                 status.className = 'badge ' + key + '-badge';
-                status.textContent = record.status.toUpperCase();
+                status.textContent = record.status;
             } else {
-                welcome.textContent += ' (Grades not released by teacher yet)';
+                welcome.textContent += ' (no grades yet)';
             }
         }
 

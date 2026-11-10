@@ -52,12 +52,12 @@
 
         <div class="form-group">
             <label for="regFirstName">First Name</label>
-            <input type="text" id="regFirstName">
+            <input type="text" id="regFirstName" placeholder="e.g., John">
         </div>
 
         <div class="form-group">
             <label for="regLastName">Last Name</label>
-            <input type="text" id="regLastName">
+            <input type="text" id="regLastName" placeholder="e.g., Doe">
         </div>
 
         <div class="form-group">
@@ -66,7 +66,7 @@
         </div>
 
         <div class="form-group">
-            <label for="regPassword">Password</label>
+            <label for="regPassword">Password (Min 6 chars)</label>
             <input type="password" id="regPassword">
         </div>
 
@@ -85,12 +85,12 @@
 
         <div class="form-group">
             <label for="tFirstName">First Name</label>
-            <input type="text" id="tFirstName">
+            <input type="text" id="tFirstName" placeholder="e.g., Jane">
         </div>
 
         <div class="form-group">
             <label for="tLastName">Last Name</label>
-            <input type="text" id="tLastName">
+            <input type="text" id="tLastName" placeholder="e.g., Smith">
         </div>
 
         <div class="form-group">
@@ -99,7 +99,7 @@
         </div>
 
         <div class="form-group">
-            <label for="tPassword">Password</label>
+            <label for="tPassword">Password (Min 6 chars)</label>
             <input type="password" id="tPassword">
         </div>
 
@@ -108,129 +108,173 @@
             <input type="password" id="tAccessKey" placeholder="Enter security token">
         </div>
 
-        <button onclick="handleTeacherRegister()" style="background-color: #e05555;">Verify & Save Staff Account</button>
+        <button onclick="handleTeacherRegister()" style="background-color: #e05555;">Verify &amp; Save Staff Account</button>
         <p class="subtitle link"><a href="#" onclick="showCard('loginBox')">Back to Sign In</a></p>
     </div>
 
     <script>
         if (!localStorage.getItem('usersDB')) {
-            localStorage.setItem('usersDB', JSON.stringify({
-                "teacher@school.com": { password: "teacher123", role: "teacher", name: "Prof. Matheus", studentID: "" },
-                "student@school.com": { password: "student123", role: "student", name: "Matheus Dias", studentID: "123456" }
-            }));
+            var db = {
+                "teacher@school.com": { password: btoa("teacher123"), role: "teacher", name: btoa("Prof. Matheus"), studentID: "" },
+                "student@school.com": { password: btoa("student123"), role: "student", name: btoa("Matheus Dias"), studentID: "123456" }
+            };
+            localStorage.setItem('usersDB', JSON.stringify(db));
         }
 
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        var nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ]{2,}$/;
+
         function showCard(targetId) {
-            ['loginBox', 'registerBox', 'teacherRegisterBox'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
+            var cards = ['loginBox', 'registerBox', 'teacherRegisterBox'];
+            for (var i = 0; i < cards.length; i++) {
+                document.getElementById(cards[i]).classList.add('hidden');
+            }
             document.getElementById(targetId).classList.remove('hidden');
         }
 
         function handleLogin() {
-            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-            const password = document.getElementById('loginPassword').value;
-            const users = JSON.parse(localStorage.getItem('usersDB'));
-            const user = users[email];
+            var email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            var password = document.getElementById('loginPassword').value;
+            var users = JSON.parse(localStorage.getItem('usersDB'));
+            var user = users[email];
 
-            if (!user || user.password !== password) {
+            if (!emailRegex.test(email)) {
+                alert("Security Error: Please enter a valid email format.");
+                return;
+            }
+
+            if (!user || atob(user.password) !== password) {
                 alert("Wrong email or password.");
                 return;
             }
 
             localStorage.setItem('currentUser', JSON.stringify({
                 email: email,
-                name: user.name,
+                name: atob(user.name),
                 role: user.role,
                 studentID: user.studentID
             }));
-
             location.href = user.role === 'teacher' ? 'teacher.html' : 'student.html';
         }
 
         function handleStudentRegister() {
-            const firstName = document.getElementById('regFirstName').value.trim();
-            const lastName = document.getElementById('regLastName').value.trim();
-            const email = document.getElementById('regEmail').value.trim().toLowerCase();
-            const password = document.getElementById('regPassword').value;
-            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            var firstName = document.getElementById('regFirstName').value.trim();
+            var lastName = document.getElementById('regLastName').value.trim();
+            var email = document.getElementById('regEmail').value.trim().toLowerCase();
+            var password = document.getElementById('regPassword').value;
+            var confirmPassword = document.getElementById('regConfirmPassword').value;
 
             if (!firstName || !lastName || !email || !password || !confirmPassword) {
-                alert("Fill in all the fields.");
+                alert("Validation Error: Fill in all the fields.");
+                return;
+            }
+
+            if (!nameRegex.test(firstName)) {
+                alert("Security Error: First Name must contain only letters and be at least 2 characters long.");
+                return;
+            }
+            if (!nameRegex.test(lastName)) {
+                alert("Security Error: Last Name must contain only letters and be at least 2 characters long.");
+                return;
+            }
+
+            if (!emailRegex.test(email)) {
+                alert("Security Error: Invalid email format. Use pattern: user@domain.com");
+                return;
+            }
+
+            if (password.length < 6) {
+                alert("Security Error: Password must be at least 6 characters long.");
                 return;
             }
 
             if (password !== confirmPassword) {
-                alert("Passwords do not match.");
+                alert("Validation Error: Passwords do not match.");
                 return;
             }
 
-            const users = JSON.parse(localStorage.getItem('usersDB')) || {};
+            var users = JSON.parse(localStorage.getItem('usersDB')) || {};
 
             if (users[email] && users[email].role === 'teacher') {
-                alert("This email is already registered as a Teacher account.");
+                alert("Conflict Error: This email is already registered as a Teacher account.");
                 return;
             }
 
-            const fullName = `${firstName.charAt(0).toUpperCase() + firstName.slice(1)} ${lastName.charAt(0).toUpperCase() + lastName.slice(1)}`;
-            let existingStudentID = users[email] ? users[email].studentID : "";
+            var fullName = firstName.charAt(0).toUpperCase() + firstName.slice(1) + " " + lastName.charAt(0).toUpperCase() + lastName.slice(1);
+            var studentId = users[email] ? users[email].studentID : "";
 
-            if (!existingStudentID) {
-                const duplicateNameUser = Object.values(users).find(u => u.name.toLowerCase() === fullName.toLowerCase());
-                if (duplicateNameUser) {
-                    existingStudentID = duplicateNameUser.studentID;
+            if (!studentId) {
+                var sameName = Object.values(users).find(function (u) {
+                    return atob(u.name).toLowerCase() === fullName.toLowerCase();
+                });
+                if (sameName) {
+                    studentId = sameName.studentID;
                 }
             }
 
-            if (!existingStudentID) {
+            if (!studentId) {
                 do {
-                    existingStudentID = Math.floor(100000 + Math.random() * 900000).toString();
-                    var idExists = Object.values(users).some(u => u.studentID === existingStudentID);
-                } while (idExists);
+                    studentId = Math.floor(100000 + Math.random() * 900000).toString();
+                } while (Object.values(users).some(function (u) { return u.studentID === studentId; }));
             }
 
             users[email] = {
-                password: password,
+                password: btoa(password),
                 role: "student",
-                name: fullName,
-                studentID: existingStudentID
+                name: btoa(fullName),
+                studentID: studentId
             };
 
             localStorage.setItem('usersDB', JSON.stringify(users));
-            alert(`Student account securely processed!\n\nYour PERMANENT Student ID (RA) is: ${existingStudentID}`);
+            alert("Student account securely processed!\n\nYour PERMANENT Student ID (RA) is: " + studentId);
             showCard('loginBox');
         }
 
         function handleTeacherRegister() {
-            const firstName = document.getElementById('tFirstName').value.trim();
-            const lastName = document.getElementById('tLastName').value.trim();
-            const email = document.getElementById('tEmail').value.trim().toLowerCase();
-            const password = document.getElementById('tPassword').value;
-            const accessKey = document.getElementById('tAccessKey').value.trim();
+            var firstName = document.getElementById('tFirstName').value.trim();
+            var lastName = document.getElementById('tLastName').value.trim();
+            var email = document.getElementById('tEmail').value.trim().toLowerCase();
+            var password = document.getElementById('tPassword').value;
+            var accessKey = document.getElementById('tAccessKey').value.trim();
 
             if (!firstName || !lastName || !email || !password || !accessKey) {
-                alert("Fill in all institutional fields.");
+                alert("Validation Error: Fill in all institutional fields.");
                 return;
             }
 
-            if (accessKey !== "SCHOOL2026") {
+            if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
+                alert("Security Error: Names must contain only letters and be at least 2 characters long.");
+                return;
+            }
+
+            if (!emailRegex.test(email)) {
+                alert("Security Error: Invalid institutional email format.");
+                return;
+            }
+
+            if (password.length < 6) {
+                alert("Security Error: Password must be at least 6 characters long.");
+                return;
+            }
+
+            if (btoa(accessKey) !== "U0NIT09MMjAyNg==") {
                 alert("Access Denied: Invalid Institutional Access Key.");
                 return;
             }
 
-            const users = JSON.parse(localStorage.getItem('usersDB')) || {};
+            var users = JSON.parse(localStorage.getItem('usersDB')) || {};
 
             if (users[email] && users[email].role === 'student') {
-                alert("This email is already registered as a Student account.");
+                alert("Conflict Error: This email is already registered as a Student account.");
                 return;
             }
 
-            const fullName = `Prof. ${firstName.charAt(0).toUpperCase() + firstName.slice(1)} ${lastName.charAt(0).toUpperCase() + lastName.slice(1)}`;
+            var fullName = "Prof. " + firstName.charAt(0).toUpperCase() + firstName.slice(1) + " " + lastName.charAt(0).toUpperCase() + lastName.slice(1);
 
             users[email] = {
-                password: password,
+                password: btoa(password),
                 role: "teacher",
-                name: fullName,
+                name: btoa(fullName),
                 studentID: ""
             };
 
